@@ -1,0 +1,7 @@
+# GitHub Pages Jekyll 配置
+# 防止 Jekyll 构建时排除 _ 开头的目录（_shared 含字体与图表库）
+include:
+  - _shared
+
+# 本站为纯静态站点，不做 Jekyll 处理
+markdown: none
