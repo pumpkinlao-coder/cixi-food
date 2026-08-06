@@ -400,14 +400,52 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 .modal-nav .btn-nav[data-id] { visibility: visible; }
 
 /* ===== About / footer ===== */
-.about-box {
-  background: var(--bg2); border: 1px solid var(--rule); border-radius: 20px;
-  padding: 2rem; display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem;
-}
+.about-box { background: var(--bg2); border: 1px solid var(--rule); border-radius: 20px; padding: 2rem; display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; }
 .about-box h3 { font-family: var(--serif); font-size: 1.3rem; margin-bottom: 0.8rem; }
 .about-box p { font-size: 0.92rem; color: var(--muted); margin-bottom: 0.8rem; }
 .about-note { background: rgba(95,127,85,0.1); border: 1px solid rgba(95,127,85,0.3); border-radius: 14px; padding: 1.2rem; font-size: 0.88rem; color: #445c3b; }
 .about-note b { color: var(--accent2); }
+
+.about-lead {
+  background: linear-gradient(135deg, rgba(168,70,46,0.07), rgba(197,154,75,0.07));
+  border: 1px solid var(--rule); border-radius: 18px;
+  padding: 1.6rem 1.8rem; margin-bottom: 1.3rem;
+  font-size: 1rem; line-height: 1.9;
+}
+.about-lead b { color: var(--accent); }
+
+.about-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.3rem; }
+.about-stat {
+  background: var(--bg2); border: 1px solid var(--rule); border-radius: 16px;
+  padding: 1.1rem 1rem; text-align: center;
+}
+.about-stat b {
+  font-family: var(--latin); font-weight: 700; font-size: 1.9rem;
+  color: var(--accent); display: block; line-height: 1.15;
+}
+.about-stat span { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.05em; }
+
+.about-subtitle { font-family: var(--serif); font-size: 1.25rem; margin: 1.8rem 0 0.9rem; }
+.about-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.about-feature {
+  background: var(--bg2); border: 1px solid var(--rule); border-radius: 16px;
+  padding: 1.2rem 1.3rem;
+}
+.about-feature h4 { font-family: var(--serif); font-size: 1.05rem; margin-bottom: 0.4rem; }
+.about-feature p { font-size: 0.88rem; color: var(--muted); }
+.about-feature code {
+  font-size: 0.82rem; background: rgba(168,70,46,0.08); color: var(--accent);
+  padding: 0.08rem 0.4rem; border-radius: 6px; font-family: var(--latin);
+}
+
+.about-box-plain { grid-template-columns: 1fr; padding: 1.6rem 1.8rem; }
+.about-box-plain p { margin-bottom: 1rem; }
+.about-warn {
+  background: rgba(197,154,75,0.1); border: 1px dashed rgba(197,154,75,0.55);
+  border-radius: 12px; padding: 0.95rem 1.2rem;
+  font-size: 0.88rem; color: #6d5626; line-height: 1.8;
+}
+.about-warn b { color: #8a6d3b; }
 
 .site-footer {
   border-top: 1px solid var(--rule);
@@ -443,6 +481,7 @@ sup a:hover { text-decoration: underline; }
   .special-grid { grid-template-columns: repeat(2, 1fr); }
   .data-wrap { grid-template-columns: 1fr; }
   .about-box { grid-template-columns: 1fr; }
+  .about-stats { grid-template-columns: repeat(2, 1fr); }
   .hero-art { opacity: 0.25; }
 }
 @media (max-width: 640px) {
@@ -459,6 +498,7 @@ sup a:hover { text-decoration: underline; }
   .modal { padding: 1.6rem 1.3rem 1.4rem; }
   .modal-head { flex-direction: row; }
   .ingredients { grid-template-columns: 1fr; }
+  .about-features { grid-template-columns: 1fr; }
   .hero-art { display: none; }
   .hero-search { flex-wrap: wrap; border-radius: 18px; padding: 0.6rem; }
   .hero-search input { width: 100%; flex-basis: 100%; }
@@ -659,25 +699,79 @@ sup a:hover { text-decoration: underline; }
       <div class="section-kicker">ABOUT</div>
       <h2>关于本站</h2>
       <div class="section-title-line"></div>
+      <p>一座慈溪人家的灶台，装进网页里。做一本可以照着做的慈溪菜谱，是本网站的初衷。</p>
     </div>
+
+    <div class="about-lead">
+      <p>
+        慈溪地处杭州湾南岸、三北平原腹地，东海渔场与江南沃野在此交汇，孕育出
+        <b>“江南软糯 + 沿海鲜甜”</b>的独特食风。本站把这些散落在街巷灶台间的老味道整理成册——
+        从东海渔获的鲜、老坛发酵的臭，到年糕汤圆的糯、杨梅糖水的甜，一百七十余道家常做法，
+        让身处他乡的人也能循着文字，还原一口家乡味。
+      </p>
+    </div>
+
+    <div class="about-stats">
+      <div class="about-stat"><b>175</b><span>道慈溪与甬帮菜</span></div>
+      <div class="about-stat"><b>7</b><span>大食材与做法分类</span></div>
+      <div class="about-stat"><b>100%</b><span>附材料与分步做法</span></div>
+      <div class="about-stat"><b>0</b><span>外网依赖 · 纯静态</span></div>
+    </div>
+
     <div class="about-box">
       <div>
-        <h3>做一本可以照着做的慈溪菜谱</h3>
+        <h3>收录范围</h3>
         <p>
-          本站为菜谱查询网站，收录 175 道慈溪与甬帮菜做法。每道菜均给出
-          <b>材料清单</b>与<b>分步做法</b>，并附难度、用时与实操小贴士，力求在家也能还原老味道。
+          从<b>东海渔获</b>（黄鱼、带鱼、梭子蟹、海瓜子、望潮）到<b>田间时蔬</b>（春笋、蚕豆、马兰头），
+          从<b>老坛发酵</b>（三臭、醉泥螺、蟹糊）到<b>炉灶烟火</b>（扣肉、红烧、年糕汤），
+          覆盖甬帮菜“十大名菜”、慈溪“三臭三糟”、非遗名点（三北年糕、豆酥糖、藕丝糖）与杨梅系列甜品。
         </p>
         <p>
-          页面支持<b>关键词搜索</b>（菜名、食材、标签）、<b>分类筛选</b>、<b>难度与用时排序</b>，
-          点击任意菜卡即可查看完整做法，也可用“今天吃什么”随机邂逅一道菜。
+          每道菜均包含<b>材料清单</b>（标注用量）、<b>编号分步做法</b>、<b>难度分级</b>（简单 / 中等 / 较难）、
+          <b>预计用时</b>与<b>实操小贴士</b>，力求照做可成。
         </p>
-        <p>提示：生腌（炝蟹、醉蟹、泥螺等）与发酵（三臭）类菜品请注意食材新鲜度与个人体质，酌情食用。</p>
       </div>
       <div class="about-note">
         <b>风味坐标</b><br><br>
         慈溪 · 宁波 · 杭州湾南岸<br><br>
         味型：鲜咸合一 · 霉鲜 · 臭鲜 · 糟醉鲜<br><br>
         代表名产：杨梅 · 泥螺 · 海瓜子 · 三北年糕 · 周巷榨菜
+      </div>
+    </div>
+
+    <h3 class="about-subtitle">如何使用本站</h3>
+    <div class="about-features">
+      <div class="about-feature">
+        <h4>🔍 关键词搜索</h4>
+        <p>顶部搜索框输入菜名、食材或标签（如“黄鱼”“年糕”“杨梅”），实时过滤全部菜谱。</p>
+      </div>
+      <div class="about-feature">
+        <h4>🗂 分类与排序</h4>
+        <p>按七大类筛选浏览，也可按难度或用时排序，快速找到适合当下的一餐。</p>
+      </div>
+      <div class="about-feature">
+        <h4>📖 详情查看</h4>
+        <p>点击任意菜卡展开完整做法，支持“上一道 / 下一道”连续翻阅，键盘 ← → 亦可切换。</p>
+      </div>
+      <div class="about-feature">
+        <h4>🎲 今天吃什么</h4>
+        <p>选择困难？点一下随机按钮，让缘分替你决定今晚的菜单。深链直达：<code>#recipe-15</code></p>
+      </div>
+    </div>
+
+    <h3 class="about-subtitle">内容说明</h3>
+    <div class="about-box about-box-plain">
+      <div>
+        <p>
+          菜谱做法依据宁波甬帮菜地方传统与公开食谱整理，调味以<b>生抽、黄酒、冰糖</b>为主，
+          突出“鲜咸合一、原汁原味”的本帮基调；家庭烹饪中火候与咸淡可依个人口味微调，
+          文中的“汤匙 / 茶匙”为家庭计量约数。
+        </p>
+        <div class="about-warn">
+          <b>温馨提示</b><br>
+          生腌（炝蟹、醉蟹、泥螺、醉虾等）与发酵（三臭、糟卤等）类菜品，
+          请务必选用新鲜食材并注意卫生，肠胃敏感者与孕妇请酌情食用；本网站内容仅供家庭烹饪参考。
+        </div>
       </div>
     </div>
   </section>
