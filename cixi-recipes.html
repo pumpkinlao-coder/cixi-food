@@ -391,6 +391,19 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
   padding: 0.85rem 1.1rem; font-size: 0.9rem; color: #6d5626;
 }
 .modal-tips b { color: #8a6d3b; }
+
+.modal-refs { margin-top: 0.2rem; }
+.ref-list { list-style: none; display: grid; gap: 0.45rem; }
+.ref-list li {
+  font-size: 0.82rem; padding: 0.45rem 0.6rem 0.45rem 0.9rem;
+  background: rgba(95,127,85,0.06); border: 1px solid rgba(95,127,85,0.18);
+  border-radius: 8px; position: relative; overflow-wrap: break-word; word-break: break-all;
+}
+.ref-list li::before {
+  content: "📖"; position: absolute; left: 0.35rem; top: 0.5rem; font-size: 0.7rem;
+}
+.ref-list a { color: var(--accent2); text-decoration: none; }
+.ref-list a:hover { text-decoration: underline; }
 .modal-nav {
   display: flex; gap: 0.7rem; margin-top: 1.8rem; padding-top: 1.2rem;
   border-top: 1px solid var(--rule); justify-content: center;
@@ -826,6 +839,12 @@ sup a:hover { text-decoration: underline; }
       <ol class="steps" id="modalSteps"></ol>
     </section>
     <div class="modal-tips" id="modalTips"><b>小贴士</b></div>
+    <div class="modal-refs" id="modalRefs">
+      <div class="modal-section">
+        <h3>参考来源</h3>
+        <ul class="ref-list" id="modalRefList"></ul>
+      </div>
+    </div>
     <div class="modal-nav">
       <button class="btn btn-ghost btn-nav" id="prevBtn">← 上一道</button>
       <button class="btn btn-accent" id="randomBtn">🎲 随机一道</button>
@@ -841,6 +860,7 @@ sup a:hover { text-decoration: underline; }
 <script src="assets/recipes-part3.js"></script>
 <script src="assets/recipes-part4.js"></script>
 <script src="assets/recipes-part5.js"></script>
+<script src="assets/refs.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>
 <script src="assets/app.js"></script>
 </body>

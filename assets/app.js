@@ -130,6 +130,21 @@
     document.getElementById("modalTips").textContent = r.tips || "按个人口味调整盐糖用量。";
     document.getElementById("modalTips").style.display = r.tips ? "block" : "none";
 
+    // 参考来源
+    var refBox = document.getElementById("modalRefs");
+    var refs = (typeof RECIPE_REFS !== "undefined" && RECIPE_REFS[r.id]) || [];
+    var srcList = document.getElementById("modalRefList");
+    if (refs.length) {
+      srcList.innerHTML = refs.map(function (sid) {
+        var s = SOURCE_LIB[sid];
+        if (!s) return "";
+        return '<li><a href="' + s.u + '" target="_blank" rel="noopener">' + s.t + "</a></li>";
+      }).join("");
+      refBox.style.display = "block";
+    } else {
+      refBox.style.display = "none";
+    }
+
     var prevBtn = document.getElementById("prevBtn");
     var nextBtn = document.getElementById("nextBtn");
     prevBtn.style.visibility = prevId ? "visible" : "hidden";
