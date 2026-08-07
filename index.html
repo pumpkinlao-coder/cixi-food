@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta http-equiv="refresh" content="0; url=cixi-recipes.html">
 <title>慈溪味 · 菜谱大全</title>
-<script>location.replace('cixi-recipes.html');</script>
+<script>
+// 保留 hash（如 #recipe-15）跳转到主页面
+var dest = 'cixi-recipes.html' + (location.hash || '');
+location.replace(dest);
+</script>
 </head>
 <body>
 <p>正在跳转至 <a href="cixi-recipes.html">慈溪味 · 菜谱大全</a>…</p>

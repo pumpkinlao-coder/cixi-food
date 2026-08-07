@@ -317,9 +317,11 @@
     if (m) {
       var id = parseInt(m[1], 10);
       if (RECIPES.some(function (r) { return r.id === id; })) {
-        setTimeout(function () { openModal(id, RECIPES); }, 150);
+        openModal(id, RECIPES);
+        return true;
       }
     }
+    return false;
   }
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -328,6 +330,14 @@
     renderGrid();
     bind();
     initChart();
-    deepLink();
+    // 初始 hash 可能尚未就绪，分两步处理确保深链可靠
+    setTimeout(function () { deepLink(); }, 300);
+  });
+
+  // 支持 hash 变化时（如点击带 #recipe-N 的链接）打开对应菜谱
+  window.addEventListener("hashchange", function () {
+    if (deepLink()) return;
+    // 无有效 hash 时关闭弹窗
+    closeModal();
   });
 })();
