@@ -193,6 +193,11 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 .pill:hover { border-color: var(--accent); color: var(--accent); }
 .pill.active { background: var(--ink); color: var(--bg2); border-color: var(--ink); }
 .pill.active span { background: rgba(255,255,255,0.16); color: var(--bg2); }
+.pill-remote { border-style: dashed; }
+.pill-remote.active {
+  background: var(--accent2); color: #fff; border-color: var(--accent2); border-style: solid;
+}
+.pill-remote.active span { background: rgba(255,255,255,0.18); color: #fff; }
 .filter-right { margin-left: auto; display: flex; align-items: center; gap: 0.8rem; }
 .filter-right label { font-size: 0.82rem; color: var(--muted); }
 .sort-select {
@@ -249,6 +254,10 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 }
 .chip-cat { color: var(--cat); background: color-mix(in srgb, var(--cat) 12%, var(--bg2)); border: 1px solid color-mix(in srgb, var(--cat) 30%, transparent); }
 .chip-fame { color: #fff; background: linear-gradient(135deg, #c25f3a, var(--accent)); }
+.chip-remote {
+  margin-left: auto; color: var(--accent2); font-weight: 600;
+  background: rgba(95,127,85,0.1); border: 1px solid rgba(95,127,85,0.35);
+}
 .card-name {
   font-family: var(--serif); font-size: 1.18rem; font-weight: 700; letter-spacing: 0.02em;
   margin-top: 0.15rem;
@@ -354,6 +363,13 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 .modal-tags { display: flex; gap: 0.4rem; margin-top: 0.6rem; flex-wrap: wrap; }
 .tag { font-size: 0.74rem; padding: 0.14rem 0.6rem; border-radius: 999px; background: rgba(168,70,46,0.1); color: var(--accent); border: 1px solid rgba(168,70,46,0.25); }
 .modal-desc { margin: 1.3rem 0 0.4rem; color: var(--muted); font-size: 0.98rem; border-left: 3px solid var(--gold); padding-left: 0.9rem; }
+.remote-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  margin: 0.5rem 0 0.2rem; padding: 0.3rem 0.8rem; border-radius: 999px;
+  font-size: 0.8rem; color: #8a6d3b; background: rgba(197,154,75,0.12);
+  border: 1px solid rgba(197,154,75,0.4);
+}
+.remote-badge.ok { color: var(--accent2); background: rgba(95,127,85,0.1); border: 1px solid rgba(95,127,85,0.35); }
 .modal-section { margin-top: 1.6rem; }
 .modal-section h3 {
   font-family: var(--serif); font-size: 1.15rem; margin-bottom: 0.8rem;
@@ -830,6 +846,7 @@ sup a:hover { text-decoration: underline; }
       </div>
     </div>
     <p class="modal-desc" id="modalDesc"></p>
+    <div class="remote-badge" id="modalRemote" style="display:none"></div>
     <section class="modal-section">
       <h3>材料清单</h3>
       <ul class="ingredients" id="modalIng"></ul>
@@ -861,6 +878,7 @@ sup a:hover { text-decoration: underline; }
 <script src="assets/recipes-part4.js"></script>
 <script src="assets/recipes-part5.js"></script>
 <script src="assets/refs.js"></script>
+<script src="assets/remote.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>
 <script src="assets/app.js"></script>
 </body>

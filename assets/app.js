@@ -16,7 +16,11 @@
   var CAT_ORDER = ["seafood", "meat", "veg", "cured", "soup", "staple", "dessert"];
   var DIFF_NAME = { 1: "简单", 2: "中等", 3: "较难" };
 
-  var state = { kw: "", cat: "all", sort: "default" };
+  var state = { kw: "", cat: "all", sort: "default", remote: false };
+
+  function isRemote(id) {
+    return (typeof REMOTE_RECIPES !== "undefined") && REMOTE_RECIPES.indexOf(id) >= 0;
+  }
 
   function timeVal(s) {
     if (!s) return 0;
@@ -37,6 +41,7 @@
 
   function matches(r) {
     if (state.cat !== "all" && r.cat !== state.cat) return false;
+    if (state.remote && !isRemote(r.id)) return false;
     var kw = state.kw.trim().toLowerCase();
     if (!kw) return true;
     var hay = (r.name + " " + r.desc + " " + r.tags.join(" ") + " " +
@@ -64,8 +69,9 @@
 
   function cardHtml(r) {
     var cat = CATS[r.cat];
+    var remote = isRemote(r.id);
     return (
-      '<article class="card ' + cat.cls + '" data-id="' + r.id + '" tabindex="0">' +
+      '<article class="card ' + cat.cls + (remote ? " is-remote" : "") + '" data-id="' + r.id + '" tabindex="0">' +
         '<div class="card-top">' +
           '<span class="card-emoji">' + r.emoji + "</span>" +
           '<span class="chip chip-cat">' + cat.name + "</span>" +
@@ -75,6 +81,7 @@
         "<p class='card-desc'>" + r.desc + "</p>" +
         '<div class="card-meta">' + diffHtml(r.diff) +
           '<span class="card-time"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.5V8l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' + r.time + "</span>" +
+          (remote ? '<span class="chip chip-remote" title="食材在普通超市/菜市场即可获得">🏠 外地可做</span>' : "") +
         "</div>" +
       "</article>"
     );
@@ -95,7 +102,11 @@
     var wrap = document.getElementById("catPills");
     if (!wrap) return;
     var counts = {};
-    RECIPES.forEach(function (r) { counts[r.cat] = (counts[r.cat] || 0) + 1; });
+    var remoteCount = 0;
+    RECIPES.forEach(function (r) {
+      counts[r.cat] = (counts[r.cat] || 0) + 1;
+      if (isRemote(r.id)) remoteCount++;
+    });
     var html =
       '<button class="pill' + (state.cat === "all" ? " active" : "") + '" data-cat="all">全部<span>' + RECIPES.length + "</span></button>";
     CAT_ORDER.forEach(function (k) {
@@ -103,6 +114,9 @@
         '<button class="pill' + (state.cat === k ? " active" : "") + '" data-cat="' + k + '">' +
         CATS[k].emoji + " " + CATS[k].name + "<span>" + counts[k] + "</span></button>";
     });
+    html +=
+      '<button class="pill pill-remote' + (state.remote ? " active" : "") + '" data-remote="1" title="食材在普通超市/菜市场即可买到，不依赖慈溪本地特产">' +
+      "🏠 外地可做<span>" + remoteCount + "</span></button>";
     wrap.innerHTML = html;
   }
 
@@ -118,6 +132,17 @@
     document.getElementById("modalEmoji").textContent = r.emoji;
     document.getElementById("modalCat").textContent = cat.name + " · " + DIFF_NAME[r.diff] + " · " + r.time;
     document.getElementById("modalDesc").textContent = r.desc;
+    var remoteBadge = document.getElementById("modalRemote");
+    if (remoteBadge) {
+      if (isRemote(r.id)) {
+        remoteBadge.className = "remote-badge ok";
+        remoteBadge.innerHTML = "🏠 外地可做 · 食材在普通超市/菜市场即可买到";
+      } else {
+        remoteBadge.className = "remote-badge";
+        remoteBadge.innerHTML = "📍 慈溪风味 · 含本地特色食材，外地可用替代或网购";
+      }
+      remoteBadge.style.display = "inline-flex";
+    }
     document.getElementById("modalTags").innerHTML = r.tags
       .map(function (t) { return '<span class="tag">' + t + "</span>"; })
       .join("");
@@ -180,7 +205,11 @@
     document.getElementById("catPills").addEventListener("click", function (e) {
       var btn = e.target.closest(".pill");
       if (!btn) return;
-      state.cat = btn.dataset.cat;
+      if (btn.dataset.remote) {
+        state.remote = !state.remote;
+      } else {
+        state.cat = btn.dataset.cat;
+      }
       renderPills();
       renderGrid();
     });
@@ -225,7 +254,7 @@
     document.getElementById("randomBtn").addEventListener("click", randomPick);
     document.getElementById("randomHero").addEventListener("click", randomPick);
     document.getElementById("resetBtn").addEventListener("click", function () {
-      state.kw = ""; state.cat = "all"; state.sort = "default";
+      state.kw = ""; state.cat = "all"; state.sort = "default"; state.remote = false;
       search.value = ""; sort.value = "default";
       renderPills();
       renderGrid();
