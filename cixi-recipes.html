@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>慈溪味 · 慈溪菜菜谱大全</title>
-<meta name="description" content="慈溪菜菜谱查询网站：175道慈溪与甬帮菜做法，涵盖海鲜河鲜、肉类时蔬、腌糟醉鲜、汤羹炖品、主食点心与甜品饮品，附完整材料与步骤。">
+<meta name="description" content="慈溪菜菜谱查询网站：206道慈溪与甬帮菜做法，涵盖海鲜河鲜、肉类时蔬、腌糟醉鲜、汤羹炖品、主食点心与甜品饮品，附完整材料与步骤。">
 <style>
 @font-face {
   font-family: "CrimsonPro";
@@ -65,31 +65,22 @@ button { font-family: inherit; cursor: pointer; }
 /* ===== Header ===== */
 .site-header {
   position: sticky; top: 0; z-index: 60;
-  background: rgba(247, 242, 233, 0.86);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(135deg, var(--accent), #c25f3a);
+  box-shadow: 0 2px 12px rgba(168, 70, 46, 0.28);
 }
 .header-inner {
-  max-width: 1200px; margin: 0 auto; padding: 0.7rem 1.5rem;
+  max-width: 1200px; margin: 0 auto; padding: 0.55rem 1.5rem;
   display: flex; align-items: center; gap: 1.2rem;
 }
-.brand { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; color: var(--ink); }
-.seal {
-  width: 42px; height: 42px; border-radius: 10px; flex: none;
-  background: linear-gradient(135deg, var(--accent), #c25f3a);
-  color: #fdf6ea; display: grid; place-items: center;
-  font-family: var(--serif); font-size: 1.4rem; font-weight: 700;
-  box-shadow: 0 3px 10px rgba(168, 70, 46, 0.35);
-}
-.brand-name { font-family: var(--serif); font-size: 1.3rem; font-weight: 700; letter-spacing: 0.04em; }
-.brand-sub { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.18em; }
+.brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #fff; white-space: nowrap; flex-shrink: 0; }
+.brand-logo { width: 36px; height: 36px; flex: none; display: block; }
+.brand-name { font-family: var(--serif); font-size: 1.25rem; font-weight: 700; letter-spacing: 0.04em; color: #fff; }
 .header-nav { margin-left: auto; display: flex; align-items: center; gap: 0.4rem; }
 .header-nav a {
-  text-decoration: none; color: var(--ink); font-size: 0.92rem;
+  text-decoration: none; color: rgba(255, 255, 255, 0.92); font-size: 0.92rem;
   padding: 0.45rem 0.85rem; border-radius: 999px; transition: background 0.2s, color 0.2s;
 }
-.header-nav a:hover { background: rgba(168, 70, 46, 0.1); color: var(--accent); }
+.header-nav a:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
 .btn {
   display: inline-flex; align-items: center; gap: 0.4rem;
   border: none; border-radius: 999px; font-size: 0.92rem; font-weight: 600;
@@ -97,6 +88,9 @@ button { font-family: inherit; cursor: pointer; }
 }
 .btn-accent { background: linear-gradient(135deg, var(--accent), #c25f3a); color: #fff; box-shadow: 0 4px 14px rgba(168, 70, 46, 0.35); }
 .btn-accent:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(168, 70, 46, 0.42); }
+/* 红色导航栏内的按钮反白，形成对比 */
+.header-nav .btn-accent { background: #fff; color: var(--accent); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14); }
+.header-nav .btn-accent:hover { color: var(--accent); box-shadow: 0 5px 16px rgba(0, 0, 0, 0.2); }
 .btn-ghost { background: transparent; border: 1px solid var(--rule); color: var(--ink); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -107,58 +101,44 @@ button { font-family: inherit; cursor: pointer; }
     radial-gradient(ellipse 60% 80% at 15% 10%, rgba(197, 154, 75, 0.10), transparent 60%),
     radial-gradient(ellipse 55% 70% at 88% 20%, rgba(95, 127, 85, 0.10), transparent 60%),
     linear-gradient(180deg, var(--bg), var(--bg));
-  padding: 4.2rem 1.5rem 3.4rem;
+  padding: 2.6rem 1.5rem 1.4rem;
 }
-.hero-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  font-size: 0.8rem; letter-spacing: 0.22em; color: var(--accent);
-  font-weight: 600; margin-bottom: 1rem;
+.hero-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; text-align: center; }
+.hero-search-wrap { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.hero-count {
+  width: 58px; height: 58px; border-radius: 50%; flex: none;
+  background: linear-gradient(135deg, var(--accent), #c25f3a);
+  color: #fdf6ea; display: grid; place-items: center;
+  box-shadow: 0 4px 14px rgba(168, 70, 46, 0.3);
 }
-.hero-eyebrow::before, .hero-eyebrow::after { content: ""; width: 26px; height: 1px; background: var(--accent); opacity: 0.5; }
-.hero h1 {
-  font-family: var(--serif); font-size: clamp(2.3rem, 5vw, 3.9rem);
-  line-height: 1.18; font-weight: 700; letter-spacing: 0.04em;
-}
-.hero h1 .em { color: var(--accent); }
-.hero-sub {
-  margin: 1.1rem 0 1.8rem; max-width: 620px; color: var(--muted); font-size: 1.05rem;
+.hero-count b {
+  font-family: var(--latin); font-weight: 700; font-size: 1.35rem; line-height: 1;
 }
 .hero-search {
-  display: flex; max-width: 560px; background: var(--bg2);
+  display: flex; max-width: 620px; flex: 1; background: var(--bg2);
   border: 1px solid var(--rule); border-radius: 999px;
-  padding: 0.4rem 0.4rem 0.4rem 1.3rem; align-items: center; gap: 0.5rem;
+  padding: 0.45rem 0.45rem 0.45rem 1.4rem; align-items: center; gap: 0.5rem;
   box-shadow: 0 8px 26px var(--shadow); transition: box-shadow 0.25s, border-color 0.25s;
 }
 .hero-search:focus-within { border-color: var(--accent); box-shadow: 0 10px 32px rgba(168, 70, 46, 0.16); }
 .hero-search svg { flex: none; color: var(--muted); }
 .hero-search input {
   flex: 1; border: none; outline: none; background: transparent;
-  font-size: 1rem; color: var(--ink); font-family: inherit; padding: 0.55rem 0;
+  font-size: 1rem; color: var(--ink); font-family: inherit; padding: 0.6rem 0;
 }
 .hero-search input::placeholder { color: var(--muted); }
 .hero-search button {
   border: none; background: var(--ink); color: var(--bg2);
-  border-radius: 999px; padding: 0.6rem 1.5rem; font-size: 0.95rem; font-weight: 600;
+  border-radius: 999px; padding: 0.65rem 1.6rem; font-size: 0.95rem; font-weight: 600;
   transition: background 0.2s, transform 0.15s;
 }
 .hero-search button:hover { background: var(--accent); }
-.hero-actions { display: flex; gap: 0.8rem; margin-top: 1.4rem; flex-wrap: wrap; align-items: center; }
-
-.hero-stats { display: flex; gap: 2.4rem; margin-top: 2.8rem; flex-wrap: wrap; }
-.stat b {
-  font-family: var(--latin); font-weight: 700; font-size: 2.1rem; color: var(--accent);
-  display: block; line-height: 1.1;
-}
-.stat span { font-size: 0.85rem; color: var(--muted); letter-spacing: 0.08em; }
-
-/* hero art */
-.hero-art { position: absolute; right: -2%; top: 50%; transform: translateY(-50%); width: min(46%, 560px); opacity: 0.9; pointer-events: none; z-index: 1; }
 
 /* ===== Sections ===== */
 main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
-.section { padding: 3.2rem 0; }
-.section-head { margin-bottom: 1.8rem; }
+.section { padding: 2.2rem 0; }
+#recipes { padding-top: 0.8rem; }
+.section-head { margin-bottom: 1rem; }
 .section-kicker {
   font-size: 0.78rem; letter-spacing: 0.24em; color: var(--accent);
   font-weight: 600; text-transform: uppercase;
@@ -178,8 +158,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--rule);
   border-radius: 18px;
-  padding: 0.9rem 1.1rem;
-  margin-bottom: 1.8rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.1rem;
   box-shadow: 0 6px 20px var(--shadow);
 }
 .filter-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
@@ -200,6 +180,28 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 .pill-remote.active span { background: rgba(255,255,255,0.18); color: #fff; }
 .filter-right { margin-left: auto; display: flex; align-items: center; gap: 0.8rem; }
 .filter-right label { font-size: 0.82rem; color: var(--muted); }
+
+/* 筛选说明条 */
+.filter-hint {
+  display: flex; gap: 0.75rem; align-items: flex-start;
+  background: rgba(95,127,85,0.07); border: 1px solid rgba(95,127,85,0.25);
+  border-radius: 14px; padding: 0.8rem 1rem; margin: 0.6rem 0 1rem;
+  font-size: 0.88rem; color: var(--muted); line-height: 1.7;
+}
+.filter-hint-ic { font-size: 1.2rem; line-height: 1.5; flex: none; }
+.filter-hint-body { min-width: 0; }
+.filter-hint p { margin: 0; }
+.filter-hint b { color: var(--accent2); }
+.hint-toggle {
+  border: none; background: none; padding: 0; margin-left: 0.3rem;
+  color: var(--accent); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  text-decoration: underline dotted; text-underline-offset: 3px;
+}
+.hint-toggle:hover { color: #7a2f1d; }
+.filter-hint-detail { margin-top: 0.6rem; }
+.filter-hint-detail ul { padding-left: 1.1rem; display: grid; gap: 0.4rem; }
+.filter-hint-detail li { font-size: 0.84rem; }
+.filter-hint-detail b { color: var(--ink); }
 .sort-select {
   border: 1px solid var(--rule); background: var(--bg2); color: var(--ink);
   border-radius: 10px; padding: 0.4rem 0.7rem; font-size: 0.88rem; font-family: inherit; outline: none;
@@ -210,7 +212,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 
 /* ===== Grid & Cards ===== */
 .grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
 }
 .card {
   --cat: var(--cat-seafood);
@@ -282,6 +284,15 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 .empty p { margin-bottom: 1.2rem; }
 
 /* ===== Flavor section ===== */
+.flavor-hero { text-align: center; margin: 0.5rem 0 2.4rem; }
+.flavor-hero h1 {
+  font-family: var(--serif); font-size: clamp(2rem, 4.6vw, 3.2rem);
+  line-height: 1.18; font-weight: 700; letter-spacing: 0.04em;
+}
+.flavor-hero h1 .em { color: var(--accent); }
+.flavor-hero-sub {
+  margin: 1rem auto 0; max-width: 640px; color: var(--muted); font-size: 1.02rem; line-height: 1.8;
+}
 .flavor-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.1rem; }
 .flavor-card {
   background: var(--bg2); border: 1px solid var(--rule); border-radius: 16px;
@@ -343,6 +354,67 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
   transform: translateY(16px); transition: transform 0.28s;
 }
 .overlay.open .modal { transform: translateY(0); }
+
+/* ===== 一键点菜 ===== */
+.btn-order {
+  background: linear-gradient(135deg, var(--accent), #c25f3a); color: #fff;
+  box-shadow: 0 4px 14px rgba(168, 70, 46, 0.35); white-space: nowrap;
+}
+.btn-order:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(168, 70, 46, 0.42); }
+.order-modal { width: min(680px, 100%); }
+.modal-sub { font-size: 0.88rem; color: var(--muted); margin-top: 0.3rem; }
+.order-form { margin-top: 1.4rem; }
+.order-field { margin-bottom: 1.2rem; }
+.order-label {
+  font-size: 0.85rem; font-weight: 700; color: var(--ink);
+  letter-spacing: 0.05em; margin-bottom: 0.6rem;
+}
+.order-people { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.order-pill {
+  border: 1px solid var(--rule); background: var(--bg); color: var(--ink);
+  border-radius: 999px; padding: 0.55rem 1.2rem; font-size: 0.95rem;
+  font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.18s;
+}
+.order-pill:hover { border-color: var(--accent); color: var(--accent); }
+.order-pill.active { background: var(--ink); color: var(--bg2); border-color: var(--ink); }
+.order-pill.active:hover { color: var(--bg2); }
+#orderDrink.active {
+  background: linear-gradient(135deg, #b8862e, #d9a441); color: #fff;
+  border-color: transparent;
+}
+.drink-ic { display: inline-block; }
+.drink-note {
+  margin-top: 0.6rem; font-size: 0.82rem; color: var(--accent2);
+  background: rgba(95,127,85,0.08); border: 1px dashed rgba(95,127,85,0.4);
+  border-radius: 10px; padding: 0.5rem 0.85rem; line-height: 1.6;
+}
+.btn-order-go { width: 100%; justify-content: center; padding: 0.8rem; font-size: 1.05rem; margin-top: 0.4rem; }
+.order-result { margin-top: 1.5rem; border-top: 1px dashed var(--rule); padding-top: 1.2rem; }
+.order-result-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem;
+}
+.order-result-head > span { font-weight: 700; font-size: 1.02rem; font-family: var(--serif); }
+.order-actions { display: flex; gap: 0.5rem; }
+.order-group { margin-bottom: 1.1rem; }
+.order-group-title {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em;
+  padding: 0.25rem 0.8rem; border-radius: 999px; margin-bottom: 0.55rem;
+}
+.order-group-title.cold { background: rgba(61,107,143,0.12); color: #2f5b7a; }
+.order-group-title.hot { background: rgba(168,70,46,0.12); color: var(--accent); }
+.order-group-title.soup { background: rgba(197,154,75,0.18); color: #8a6d3b; }
+.order-group-title.staple { background: rgba(95,127,85,0.14); color: var(--accent2); }
+.order-items { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.order-item {
+  border: 1px solid var(--rule); background: var(--bg); border-radius: 999px;
+  padding: 0.45rem 1rem; font-size: 0.92rem; cursor: pointer;
+  transition: all 0.18s; font-family: inherit;
+}
+.order-item:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.order-item .oi-emoji { margin-right: 0.35rem; }
+.order-tip { font-size: 0.8rem; color: var(--muted); margin-top: 0.8rem; text-align: center; }
 .modal-close {
   position: absolute; top: 1rem; right: 1.1rem;
   width: 38px; height: 38px; border-radius: 50%;
@@ -371,6 +443,16 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 }
 .remote-badge.ok { color: var(--accent2); background: rgba(95,127,85,0.1); border: 1px solid rgba(95,127,85,0.35); }
 .modal-section { margin-top: 1.6rem; }
+.variant-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.2rem 0 1rem; }
+.variant-tab {
+  border: 1px solid var(--rule); background: var(--bg2); color: var(--muted);
+  border-radius: 999px; padding: 0.4rem 1rem; font-size: 0.85rem;
+  font-family: inherit; cursor: pointer; transition: all 0.2s;
+}
+.variant-tab.active {
+  background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
+}
+.variant-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
 .modal-section h3 {
   font-family: var(--serif); font-size: 1.15rem; margin-bottom: 0.8rem;
   display: flex; align-items: center; gap: 0.5rem;
@@ -511,27 +593,45 @@ sup a:hover { text-decoration: underline; }
   .data-wrap { grid-template-columns: 1fr; }
   .about-box { grid-template-columns: 1fr; }
   .about-stats { grid-template-columns: repeat(2, 1fr); }
-  .hero-art { opacity: 0.25; }
 }
 @media (max-width: 640px) {
   main { padding: 0 1rem 2rem; }
-  .header-inner { padding: 0.6rem 1rem; }
-  .brand-sub { display: none; }
-  .header-nav a { font-size: 0.82rem; padding: 0.35rem 0.6rem; }
-  .header-nav .btn { padding: 0.45rem 0.85rem; font-size: 0.8rem; }
-  .hero { padding: 3rem 1rem 2.4rem; }
-  .hero-stats { gap: 1.4rem; }
+  .header-inner { padding: 0.45rem 0.8rem; gap: 0.5rem; }
+  .brand { gap: 0.4rem; }
+  .brand-logo { width: 28px; height: 28px; }
+  .brand-name { font-size: 0.95rem; }
+  .header-nav { gap: 0.15rem; }
+  .header-nav a { font-size: 0.78rem; padding: 0.32rem 0.5rem; }
+  .header-nav a[href="#flavor"], .header-nav a[href="#data"], .header-nav a[href="#about"] { display: none; }
+  .header-nav .btn { padding: 0.4rem 0.7rem; font-size: 0.75rem; }
+  .hero { padding: 2.2rem 1rem 1.6rem; }
+  .hero-count { width: 40px; height: 40px; }
+  .hero-count b { font-size: 1rem; }
+  .hero-search-wrap { gap: 0.6rem; flex-wrap: nowrap; }
+  .hero-search { flex-wrap: nowrap; border-radius: 999px; padding: 0.35rem 0.35rem 0.35rem 0.9rem; }
+  .hero-search button { padding: 0.5rem 1rem; flex: none; }
+  .hero-search input { min-width: 0; }
+  .btn-order { padding: 0.5rem 0.9rem; font-size: 0.82rem; }
+  .order-modal { padding: 1.4rem 1.1rem 1.2rem; }
+  .order-people { gap: 0.4rem; }
+  .order-pill { padding: 0.5rem 0.95rem; font-size: 0.88rem; }
+  .order-result-head { flex-direction: column; align-items: flex-start; }
+  .flavor-hero { margin: 0.2rem 0 1.8rem; }
+  .flavor-hero h1 { font-size: clamp(1.7rem, 7.5vw, 2.2rem); }
+  .flavor-hero-sub { font-size: 0.94rem; line-height: 1.75; }
   .grid { grid-template-columns: 1fr; }
-  .filter-bar { padding: 0.8rem; top: 58px; }
-  .filter-right { margin-left: 0; width: 100%; justify-content: space-between; }
-  .modal { padding: 1.6rem 1.3rem 1.4rem; }
+  .filter-bar { padding: 0.7rem; top: 50px; }
+  .filter-right { margin-left: 0; width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  .section { padding: 1.8rem 0; }
+  .modal { padding: 1.4rem 1.1rem 1.2rem; }
   .modal-head { flex-direction: row; }
   .ingredients { grid-template-columns: 1fr; }
   .about-features { grid-template-columns: 1fr; }
-  .hero-art { display: none; }
-  .hero-search { flex-wrap: wrap; border-radius: 18px; padding: 0.6rem; }
-  .hero-search input { width: 100%; flex-basis: 100%; }
-  .hero-search button { width: 100%; }
+  .about-stats { grid-template-columns: repeat(2, 1fr); }
+  .variant-tabs { gap: 0.35rem; }
+  .variant-tab { padding: 0.32rem 0.7rem; font-size: 0.78rem; }
+  .flavor-grid { grid-template-columns: 1fr; }
+  .special-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -540,11 +640,8 @@ sup a:hover { text-decoration: underline; }
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="#top" aria-label="回到顶部">
-      <span class="seal">慈</span>
-      <span>
-        <span class="brand-name">慈溪味</span><br>
-        <span class="brand-sub">CIXI FLAVORS · 菜谱集</span>
-      </span>
+      <img class="brand-logo" src="assets/logo.svg" alt="慈溪味 logo" width="36" height="36">
+      <span class="brand-name">慈溪味菜谱集</span>
     </a>
     <nav class="header-nav">
       <a href="#recipes">菜谱大全</a>
@@ -558,52 +655,15 @@ sup a:hover { text-decoration: underline; }
 
 <!-- ===== Hero ===== -->
 <div class="hero" id="top">
-  <svg class="hero-art" viewBox="0 0 640 520" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <!-- 杭州湾波浪 -->
-    <path d="M-20 360 Q 45 336 110 360 T 260 360 T 410 360 T 560 360 T 700 360 V 520 H -20 Z" fill="#5f7f55" opacity="0.10"/>
-    <path d="M-20 392 Q 45 368 110 392 T 260 392 T 410 392 T 560 392 T 700 392 V 520 H -20 Z" fill="#a8462e" opacity="0.08"/>
-    <path d="M-20 424 Q 45 400 110 424 T 260 424 T 410 424 T 560 424 T 700 424 V 520 H -20 Z" fill="#3d6b8f" opacity="0.08"/>
-    <!-- 杨梅枝 -->
-    <g transform="translate(360, 40)">
-      <path d="M10 200 C 60 160 90 110 96 40" stroke="#6d5626" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
-      <path d="M30 176 C 20 150 34 130 56 128 C 74 126 84 142 78 162 C 72 180 46 188 30 176 Z" fill="#5f7f55" opacity="0.8"/>
-      <path d="M84 76 C 74 54 88 34 106 34 C 124 34 132 52 122 70 C 112 88 92 92 84 76 Z" fill="#5f7f55" opacity="0.7"/>
-      <circle cx="118" cy="118" r="30" fill="#a8462e"/>
-      <circle cx="118" cy="118" r="30" fill="none" stroke="#8a3623" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.7"/>
-      <circle cx="158" cy="150" r="24" fill="#b85033"/>
-      <circle cx="158" cy="150" r="24" fill="none" stroke="#8a3623" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.7"/>
-      <circle cx="84" cy="142" r="20" fill="#9c3f28"/>
-      <circle cx="84" cy="142" r="20" fill="none" stroke="#8a3623" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.7"/>
-    </g>
-    <!-- 蒸腾热气 -->
-    <g stroke="#c39a4b" stroke-width="5" stroke-linecap="round" opacity="0.45">
-      <path d="M60 150 C 70 128 50 110 62 88"/>
-      <path d="M112 150 C 122 128 102 110 114 88"/>
-      <path d="M164 150 C 174 128 154 110 166 88"/>
-    </g>
-  </svg>
-
   <div class="hero-inner">
-    <div class="hero-eyebrow">杭州湾南岸 · 三北平原 · 东海风味</div>
-    <h1>人间烟火，<span class="em">慈溪味道</span></h1>
-    <p class="hero-sub">
-      靠海吃海的鲜、糯软拉丝的年糕、闻臭吃香的“三臭”、甜到心里的杨梅——
-      一百七十余道慈溪与甬帮菜做法，材料步骤一应俱全，把家乡味带回家。
-    </p>
-    <div class="hero-search" role="search">
-      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5 L17.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <input type="search" id="searchInput" placeholder="搜菜名或食材，如「黄鱼」「年糕」「杨梅」…" aria-label="搜索菜谱">
-      <button type="button" onclick="document.getElementById('searchInput').focus()">搜索</button>
-    </div>
-    <div class="hero-actions">
-      <a class="btn btn-ghost" href="#recipes">浏览全部菜谱</a>
-      <a class="btn btn-ghost" href="#flavor">了解慈溪风味</a>
-    </div>
-    <div class="hero-stats">
-      <div class="stat"><b id="statTotal">175</b><span>道慈溪菜谱</span></div>
-      <div class="stat"><b id="statEasy">–</b><span>简单易做</span></div>
-      <div class="stat"><b id="statMid">–</b><span>中等功夫</span></div>
-      <div class="stat"><b id="statHard">–</b><span>宴客硬菜</span></div>
+    <div class="hero-search-wrap">
+      <div class="hero-count" title="共收录 206 道菜谱"><b id="statTotal">206</b></div>
+      <div class="hero-search" role="search">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5 L17.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input type="search" id="searchInput" placeholder="搜菜名或食材，如「黄鱼」「年糕」「杨梅」…" aria-label="搜索菜谱">
+        <button type="button" onclick="document.getElementById('searchInput').focus()">搜索</button>
+      </div>
+      <button class="btn btn-order" id="orderOpen" type="button">🍽 一键点菜</button>
     </div>
   </div>
 </div>
@@ -612,10 +672,8 @@ sup a:hover { text-decoration: underline; }
   <!-- ===== 菜谱总览 ===== -->
   <section class="section" id="recipes">
     <div class="section-head">
-      <div class="section-kicker">RECIPES</div>
       <h2>菜谱大全</h2>
       <div class="section-title-line"></div>
-      <p>按分类浏览，或在上方搜索框输入菜名、食材关键词，即可快速定位。</p>
     </div>
 
     <div class="filter-bar">
@@ -633,6 +691,25 @@ sup a:hover { text-decoration: underline; }
       </div>
     </div>
 
+    <div class="filter-hint" id="filterHint">
+      <span class="filter-hint-ic">🏠</span>
+      <div class="filter-hint-body">
+        <p>
+          <b>「外地可做」</b>指这道菜的<b>食材在普通城市的超市 / 菜市场就能买到</b>，
+          不依赖慈溪本地特产或必须鲜活的海产，<b>人在外地也能照着做</b>。
+          点击筛选栏的「🏠 外地可做」按钮即可只看这类菜，共 <b id="hintRemoteCount">–</b> 道。
+          <button class="hint-toggle" id="hintToggle" type="button" aria-expanded="false">查看判定标准</button>
+        </p>
+        <div class="filter-hint-detail" id="hintDetail" hidden>
+          <ul>
+            <li><b>可做</b>：食材为全国通行的猪牛羊鸡、常见鱼虾贝（带鱼、鲳鱼、基围虾、花蛤、鲫鱼等）、豆腐、常见蔬菜与四季调料，或可用通用食材替代（如用大闸蟹替梭子蟹拆蟹粉、用普通咸菜替雪菜）。</li>
+            <li><b>不可做</b>：含慈溪 / 宁波特有食材的菜——海瓜子、泥螺、杨梅、三北水磨年糕（外地难以买到正品，但年糕类菜若用市售年糕替代即可做）、苔菜、望潮、龙头烤、蟹糊、霉干菜（部分城市有卖）、臭卤发酵品、活梭子蟹等；或必须鲜活海产、离开产地风味大打折扣的菜。</li>
+            <li><b>判定为参考建议</b>：同一道菜在不同城市食材可得性不同，若当地有替代渠道（生鲜平台、网购），本地特色菜同样可以做，酌情参考。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <div class="grid" id="grid" aria-live="polite"></div>
 
     <div class="empty" id="empty">
@@ -644,6 +721,13 @@ sup a:hover { text-decoration: underline; }
 
   <!-- ===== 风味简介 ===== -->
   <section class="section" id="flavor">
+    <div class="flavor-hero">
+      <h1>人间烟火，<span class="em">慈溪味道</span></h1>
+      <p class="flavor-hero-sub">
+        靠海吃海的鲜、糯软拉丝的年糕、闻臭吃香的“三臭”、甜到心里的杨梅——
+        两百余道慈溪与甬帮菜做法，材料步骤一应俱全，把家乡味带回家。
+      </p>
+    </div>
     <div class="section-head">
       <div class="section-kicker">FLAVOR</div>
       <h2>慈溪风味简介</h2>
@@ -706,7 +790,7 @@ sup a:hover { text-decoration: underline; }
     </div>
     <div class="data-wrap">
       <div class="data-aside">
-        <h3>七大门类，百道好味</h3>
+        <h3>八大分类，百道好味</h3>
         <p>从东海渔获到田间时蔬，从老坛发酵到炉灶烟火，覆盖慈溪人餐桌的方方面面。</p>
         <ul>
           <li>海鲜河鲜与咸鲜风味是绝对主角，占比最高；</li>
@@ -735,14 +819,14 @@ sup a:hover { text-decoration: underline; }
       <p>
         慈溪地处杭州湾南岸、三北平原腹地，东海渔场与江南沃野在此交汇，孕育出
         <b>“江南软糯 + 沿海鲜甜”</b>的独特食风。本站把这些散落在街巷灶台间的老味道整理成册——
-        从东海渔获的鲜、老坛发酵的臭，到年糕汤圆的糯、杨梅糖水的甜，一百七十余道家常做法，
+        从东海渔获的鲜、老坛发酵的臭，到年糕汤圆的糯、杨梅糖水的甜，两百余道家常做法，
         让身处他乡的人也能循着文字，还原一口家乡味。
       </p>
     </div>
 
     <div class="about-stats">
-      <div class="about-stat"><b>175</b><span>道慈溪与甬帮菜</span></div>
-      <div class="about-stat"><b>7</b><span>大食材与做法分类</span></div>
+      <div class="about-stat"><b>206</b><span>道慈溪与甬帮菜</span></div>
+      <div class="about-stat"><b>8</b><span>大食材与做法分类</span></div>
       <div class="about-stat"><b>100%</b><span>附材料与分步做法</span></div>
       <div class="about-stat"><b>0</b><span>外网依赖 · 纯静态</span></div>
     </div>
@@ -776,7 +860,7 @@ sup a:hover { text-decoration: underline; }
       </div>
       <div class="about-feature">
         <h4>🗂 分类与排序</h4>
-        <p>按七大类筛选浏览，也可按难度或用时排序，快速找到适合当下的一餐。</p>
+        <p>按八大类筛选浏览，也可按难度或用时排序，快速找到适合当下的一餐。</p>
       </div>
       <div class="about-feature">
         <h4>📖 详情查看</h4>
@@ -827,7 +911,7 @@ sup a:hover { text-decoration: underline; }
       </ol>
     </div>
     <div class="footer-meta">
-      <span>慈溪味 · CIXI FLAVORS 菜谱集 —— 鲜咸合一，原汁原味</span>
+      <span>慈溪味菜谱集 —— 鲜咸合一，原汁原味</span>
       <span>菜谱做法系依据地方风味传统整理，供家庭烹饪参考 · 生腌发酵类请酌量食用</span>
     </div>
   </div>
@@ -853,6 +937,7 @@ sup a:hover { text-decoration: underline; }
     </section>
     <section class="modal-section">
       <h3>做法步骤</h3>
+      <div class="variant-tabs" id="variantTabs" hidden></div>
       <ol class="steps" id="modalSteps"></ol>
     </section>
     <div class="modal-tips" id="modalTips"><b>小贴士</b></div>
@@ -870,6 +955,58 @@ sup a:hover { text-decoration: underline; }
   </div>
 </div>
 
+<!-- ===== 一键点菜面板 ===== -->
+<div class="overlay" id="orderOverlay" role="dialog" aria-modal="true" aria-label="一键点菜">
+  <div class="modal order-modal">
+    <div class="modal-head">
+      <div class="modal-head-l">
+        <span class="modal-emoji" id="orderEmoji">🍽</span>
+        <div>
+          <h2 class="modal-title">一键点菜</h2>
+          <p class="modal-sub">人在慈溪，不知道吃什么？交给它来安排</p>
+        </div>
+      </div>
+      <button class="modal-close" id="orderClose" aria-label="关闭">✕</button>
+    </div>
+
+    <div class="order-form" id="orderForm">
+      <div class="order-field">
+        <div class="order-label">几个人吃？</div>
+        <div class="order-people" id="orderPeople">
+          <button type="button" class="order-pill" data-p="2">2 人</button>
+          <button type="button" class="order-pill active" data-p="4">4 人</button>
+          <button type="button" class="order-pill" data-p="6">6 人</button>
+          <button type="button" class="order-pill" data-p="8">8 人</button>
+          <button type="button" class="order-pill" data-p="10">10 人</button>
+          <button type="button" class="order-pill" data-p="12">12 人</button>
+        </div>
+      </div>
+      <div class="order-field">
+        <div class="order-label">要不要喝点？</div>
+        <div class="order-drink">
+          <button type="button" class="order-pill" id="orderDrink" aria-pressed="false">
+            <span class="drink-ic">🍺</span> 喝一点，配下酒菜
+          </button>
+          <div class="drink-note" id="drinkNote" hidden>已加下酒菜：冷盘、香酥、糟醉卤味来几道，先上冷菜垫底</div>
+        </div>
+      </div>
+      <button class="btn btn-accent btn-order-go" id="orderGo" type="button">开始点菜</button>
+    </div>
+
+    <div class="order-result" id="orderResult" hidden>
+      <div class="order-result-head">
+        <span id="orderSummary"></span>
+        <div class="order-actions">
+          <button class="btn btn-ghost" id="orderAgain" type="button">🔄 换一桌</button>
+          <button class="btn btn-accent" id="orderEdit" type="button">✏️ 改条件</button>
+        </div>
+      </div>
+      <div id="orderMenu"></div>
+      <p class="order-tip">点击任意菜名可查看完整做法 · 冷菜先上，慢慢吃</p>
+    </div>
+  </div>
+</div>
+
 <button id="backTop" aria-label="回到顶部">↑</button>
 
 <script src="assets/recipes-part1.js"></script>
@@ -877,8 +1014,10 @@ sup a:hover { text-decoration: underline; }
 <script src="assets/recipes-part3.js"></script>
 <script src="assets/recipes-part4.js"></script>
 <script src="assets/recipes-part5.js"></script>
+<script src="assets/recipes-part6.js"></script>
 <script src="assets/refs.js"></script>
 <script src="assets/remote.js"></script>
+<script src="assets/order.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>
 <script src="assets/app.js"></script>
 </body>

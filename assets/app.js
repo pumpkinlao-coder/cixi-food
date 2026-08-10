@@ -2,10 +2,11 @@
 (function () {
   "use strict";
 
-  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5);
+  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6);
 
   var CATS = {
-    seafood: { name: "海鲜河鲜", emoji: "🦀", cls: "c-seafood" },
+    sea:     { name: "海鲜",   emoji: "🦀", cls: "c-sea" },
+    river:   { name: "河鲜",   emoji: "🐟", cls: "c-river" },
     meat:    { name: "肉类佳肴", emoji: "🥩", cls: "c-meat" },
     veg:     { name: "时蔬小炒", emoji: "🥬", cls: "c-veg" },
     cured:   { name: "腌糟醉鲜", emoji: "🥒", cls: "c-cured" },
@@ -13,7 +14,7 @@
     staple:  { name: "主食点心", emoji: "🍚", cls: "c-staple" },
     dessert: { name: "甜品饮品", emoji: "🍡", cls: "c-dessert" }
   };
-  var CAT_ORDER = ["seafood", "meat", "veg", "cured", "soup", "staple", "dessert"];
+  var CAT_ORDER = ["sea", "river", "meat", "veg", "cured", "soup", "staple", "dessert"];
   var DIFF_NAME = { 1: "简单", 2: "中等", 3: "较难" };
 
   var state = { kw: "", cat: "all", sort: "default", remote: false };
@@ -107,6 +108,8 @@
       counts[r.cat] = (counts[r.cat] || 0) + 1;
       if (isRemote(r.id)) remoteCount++;
     });
+    var hintCount = document.getElementById("hintRemoteCount");
+    if (hintCount) hintCount.textContent = remoteCount;
     var html =
       '<button class="pill' + (state.cat === "all" ? " active" : "") + '" data-cat="all">全部<span>' + RECIPES.length + "</span></button>";
     CAT_ORDER.forEach(function (k) {
@@ -149,9 +152,35 @@
     document.getElementById("modalIng").innerHTML = r.ingredients
       .map(function (x) { return "<li>" + x + "</li>"; })
       .join("");
-    document.getElementById("modalSteps").innerHTML = r.steps
-      .map(function (s, i) { return "<li><b>" + (i + 1) + "</b><p>" + s + "</p></li>"; })
-      .join("");
+
+    // 做法步骤（含变体 tab）
+    var variants = r.variants || [];
+    var tabsEl = document.getElementById("variantTabs");
+    var stepsEl = document.getElementById("modalSteps");
+    var renderSteps = function (stepsArr) {
+      stepsEl.innerHTML = stepsArr
+        .map(function (s, i) { return "<li><b>" + (i + 1) + "</b><p>" + s + "</p></li>"; })
+        .join("");
+    };
+    if (variants.length) {
+      var labels = ["做法一 · 常规"].concat(variants.map(function (v, i) { return "做法" + ["二", "三", "四"][i] + " · " + v.label.replace(/^做法[一二三四]\s*[·．.、]?\s*/, ""); }));
+      tabsEl.innerHTML = labels.map(function (lb, i) {
+        return '<button type="button" class="variant-tab' + (i === 0 ? " active" : "") + '" data-v="' + i + '">' + lb + "</button>";
+      }).join("");
+      tabsEl.hidden = false;
+      renderSteps(r.steps);
+      tabsEl.querySelectorAll(".variant-tab").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          tabsEl.querySelectorAll(".variant-tab").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+          var vi = parseInt(btn.dataset.v, 10);
+          renderSteps(vi === 0 ? r.steps : variants[vi - 1].steps);
+        });
+      });
+    } else {
+      tabsEl.hidden = true;
+      renderSteps(r.steps);
+    }
     document.getElementById("modalTips").textContent = r.tips || "按个人口味调整盐糖用量。";
     document.getElementById("modalTips").style.display = r.tips ? "block" : "none";
 
@@ -260,6 +289,17 @@
       renderGrid();
     });
 
+    var hintToggle = document.getElementById("hintToggle");
+    var hintDetail = document.getElementById("hintDetail");
+    if (hintToggle && hintDetail) {
+      hintToggle.addEventListener("click", function () {
+        var show = hintDetail.hidden;
+        hintDetail.hidden = !show;
+        hintToggle.textContent = show ? "收起判定标准" : "查看判定标准";
+        hintToggle.setAttribute("aria-expanded", show ? "true" : "false");
+      });
+    }
+
     var backTop = document.getElementById("backTop");
     window.addEventListener("scroll", function () {
       backTop.classList.toggle("show", window.scrollY > 600);
@@ -274,6 +314,88 @@
         if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); }
       });
     });
+
+    // ===== 一键点菜 =====
+    var orderOverlay = document.getElementById("orderOverlay");
+    var orderPeople = document.getElementById("orderPeople");
+    var orderDrink = document.getElementById("orderDrink");
+    var drinkNote = document.getElementById("drinkNote");
+    var orderGo = document.getElementById("orderGo");
+    var orderForm = document.getElementById("orderForm");
+    var orderResult = document.getElementById("orderResult");
+    var orderMenu = document.getElementById("orderMenu");
+    var orderSummary = document.getElementById("orderSummary");
+    var orderState = { people: 4, drink: false };
+
+    if (orderOverlay && typeof generateOrder === "function") {
+      document.getElementById("orderOpen").addEventListener("click", function () {
+        orderOverlay.classList.add("open");
+        document.body.classList.add("lock");
+      });
+      document.getElementById("orderClose").addEventListener("click", closeOrder);
+      orderOverlay.addEventListener("click", function (e) {
+        if (e.target === this) closeOrder();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && orderOverlay.classList.contains("open")) closeOrder();
+      });
+
+      orderPeople.addEventListener("click", function (e) {
+        var b = e.target.closest(".order-pill");
+        if (!b) return;
+        orderState.people = parseInt(b.dataset.p, 10);
+        orderPeople.querySelectorAll(".order-pill").forEach(function (x) { x.classList.toggle("active", x === b); });
+      });
+
+      orderDrink.addEventListener("click", function () {
+        orderState.drink = !orderState.drink;
+        orderDrink.classList.toggle("active", orderState.drink);
+        orderDrink.setAttribute("aria-pressed", orderState.drink ? "true" : "false");
+        drinkNote.hidden = !orderState.drink;
+      });
+
+      orderGo.addEventListener("click", showOrderResult);
+      document.getElementById("orderAgain").addEventListener("click", showOrderResult);
+      document.getElementById("orderEdit").addEventListener("click", function () {
+        orderForm.hidden = false;
+        orderResult.hidden = true;
+      });
+    }
+
+    function closeOrder() {
+      orderOverlay.classList.remove("open");
+      document.body.classList.remove("lock");
+    }
+
+    function showOrderResult() {
+      var o = generateOrder(orderState.people, orderState.drink);
+      var byId = {};
+      RECIPES.forEach(function (r) { byId[r.id] = r; });
+      var groups = [
+        { key: "cold", title: "🧊 冷菜 · 先上", cls: "cold", ids: o.cold },
+        { key: "hot", title: "🔥 热菜", cls: "hot", ids: o.hot },
+        { key: "soup", title: "🍲 汤羹", cls: "soup", ids: o.soup },
+        { key: "staple", title: "🍚 主食点心", cls: "staple", ids: o.staple }
+      ];
+      var html = groups.map(function (g) {
+        if (!g.ids.length) return "";
+        return '<div class="order-group"><div class="order-group-title ' + g.cls + '">' + g.title + "</div>" +
+          '<div class="order-items">' + g.ids.map(function (id) {
+            var r = byId[id];
+            return '<button type="button" class="order-item" data-id="' + id + '"><span class="oi-emoji">' + r.emoji + "</span>" + r.name + "</button>";
+          }).join("") + "</div></div>";
+      }).join("");
+      orderMenu.innerHTML = html;
+      var total = o.cold.length + o.hot.length + o.soup.length + o.staple.length;
+      orderSummary.textContent = orderState.people + " 人" + (orderState.drink ? " · 喝点" : "") + " · 共 " + total + " 道";
+      orderForm.hidden = true;
+      orderResult.hidden = false;
+      orderMenu.querySelectorAll(".order-item").forEach(function (b) {
+        b.addEventListener("click", function () {
+          openModal(parseInt(b.dataset.id, 10), filtered());
+        });
+      });
+    }
   }
 
   function initChart() {
