@@ -17,7 +17,10 @@
   var CAT_ORDER = ["sea", "river", "meat", "veg", "cured", "soup", "staple", "dessert"];
   var DIFF_NAME = { 1: "简单", 2: "中等", 3: "较难" };
 
-  var state = { kw: "", cat: "all", sort: "default", remote: false };
+  var state = { kw: "", cat: "all", sort: "default", remote: false, fav: false };
+  var curRecipe = null;
+  var curServe = 2;
+  var CX = window.CX || {};
 
   function isRemote(id) {
     return (typeof REMOTE_RECIPES !== "undefined") && REMOTE_RECIPES.indexOf(id) >= 0;
@@ -43,6 +46,7 @@
   function matches(r) {
     if (state.cat !== "all" && r.cat !== state.cat) return false;
     if (state.remote && !isRemote(r.id)) return false;
+    if (state.fav && CX.fav && !CX.fav.is(r.id)) return false;
     var kw = state.kw.trim().toLowerCase();
     if (!kw) return true;
     var hay = (r.name + " " + r.desc + " " + r.tags.join(" ") + " " +
@@ -73,6 +77,7 @@
     var remote = isRemote(r.id);
     return (
       '<article class="card ' + cat.cls + (remote ? " is-remote" : "") + '" data-id="' + r.id + '" tabindex="0">' +
+        '<button class="card-fav' + (CX.fav && CX.fav.is(r.id) ? " on" : "") + '" data-fav="' + r.id + '" aria-label="收藏" title="收藏">' + (CX.fav && CX.fav.is(r.id) ? "♥" : "♡") + "</button>" +
         '<div class="card-top">' +
           '<span class="card-emoji">' + r.emoji + "</span>" +
           '<span class="chip chip-cat">' + cat.name + "</span>" +
@@ -120,12 +125,105 @@
     html +=
       '<button class="pill pill-remote' + (state.remote ? " active" : "") + '" data-remote="1" title="食材在普通超市/菜市场即可买到，不依赖慈溪本地特产">' +
       "🏠 外地可做<span>" + remoteCount + "</span></button>";
+    var favN = CX.fav ? CX.fav.count() : 0;
+    html +=
+      '<button class="pill pill-fav' + (state.fav ? " active" : "") + '" data-fav="1" title="只看已收藏的菜">' +
+      "❤️ 我的收藏<span>" + favN + "</span></button>";
     wrap.innerHTML = html;
+  }
+
+  function byIdMap() {
+    var m = {};
+    RECIPES.forEach(function (r) { m[r.id] = r; });
+    return m;
+  }
+
+  function renderCurIngredients() {
+    if (!curRecipe) return;
+    var el = document.getElementById("modalIng");
+    var factor = curServe / 2;
+    var list = CX.scale ? CX.scale.list(curRecipe.ingredients, factor) : curRecipe.ingredients;
+    el.innerHTML = list.map(function (x) { return "<li>" + x + "</li>"; }).join("");
+  }
+
+  function renderCurNutrition() {
+    var el = document.getElementById("modalNutri");
+    if (!el) return;
+    if (!curRecipe || !CX.nutrition || !CX.nutrition.calc) { el.style.display = "none"; return; }
+    var n = CX.nutrition.calc(curRecipe);
+    if (!n || !n.matched || !n.matched.length) { el.style.display = "none"; return; }
+    el.style.display = "flex";
+    el.innerHTML =
+      '<span>参考热量 <b>' + n.kcal + '</b> 千卡</span>' +
+      '<span>蛋白质 <b>' + n.p + '</b>g</span>' +
+      '<span>脂肪 <b>' + n.f + '</b>g</span>' +
+      '<span>碳水 <b>' + n.c + '</b>g</span>' +
+      '<span class="nut-note">按主要食材估算（整道菜），仅供参考，未计入油盐酱料与烹饪损耗。</span>';
+  }
+
+  function updateFavBtn() {
+    var btn = document.getElementById("mFav");
+    if (!btn) return;
+    var on = curRecipe && CX.fav && CX.fav.is(curRecipe.id);
+    btn.innerHTML = (on ? "♥ " : "♡ ") + (on ? "已收藏" : "收藏");
+    btn.classList.toggle("on", !!on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  function updateServePills() {
+    var wrap = document.getElementById("servePills");
+    if (!wrap) return;
+    wrap.querySelectorAll(".serve-pill").forEach(function (b) {
+      b.classList.toggle("active", parseInt(b.dataset.s, 10) === curServe);
+    });
+  }
+
+  function renderShopList() {
+    var ids = CX.shop ? CX.shop.get() : [];
+    var countEl = document.getElementById("shopCount");
+    if (countEl) countEl.textContent = ids.length;
+    var listEl = document.getElementById("shopList");
+    var emptyEl = document.getElementById("shopEmpty");
+    var subEl = document.getElementById("shopSub");
+    if (!listEl) return;
+    var groups = CX.shop ? CX.shop.aggregate(byIdMap()) : [];
+    var total = 0;
+    groups.forEach(function (g) { total += g.items.length; });
+    if (total) {
+      listEl.innerHTML = groups.map(function (g) {
+        var rows = g.items.map(function (it) {
+          var cnt = it.count > 1 ? '<span class="sl-count">×' + it.count + "</span>" : "";
+          return "<li><span>" + it.text + "</span>" + cnt + "</li>";
+        }).join("");
+        var cls = "shop-group" + (g.tag === "seasoning" ? " is-seasoning" : g.tag === "other" ? " is-other" : "");
+        return '<div class="' + cls + '">' +
+          '<div class="shop-group-title">' + g.label + " <span>" + g.items.length + " 项</span></div>" +
+          '<ul class="shop-items">' + rows + "</ul></div>";
+      }).join("");
+      listEl.style.display = "block";
+      if (emptyEl) emptyEl.style.display = "none";
+      if (subEl) subEl.textContent = ids.length + " 道菜 · 共 " + total + " 项";
+    } else {
+      listEl.innerHTML = "";
+      listEl.style.display = "none";
+      if (emptyEl) emptyEl.style.display = "block";
+      if (subEl) subEl.textContent = "已加入菜谱的食材汇总";
+    }
+  }
+
+  function toggleFavFromCard(id) {
+    if (!CX.fav) return;
+    CX.fav.toggle(id);
+    renderGrid();
+    renderPills();
+    if (curRecipe && curRecipe.id === id) updateFavBtn();
   }
 
   function openModal(id, list) {
     var r = RECIPES.find(function (x) { return x.id === id; });
     if (!r) return;
+    curRecipe = r;
+    curServe = 2;
     var cat = CATS[r.cat];
     var idx = list.map(function (x) { return x.id; }).indexOf(id);
     var prevId = idx > 0 ? list[idx - 1].id : null;
@@ -149,9 +247,14 @@
     document.getElementById("modalTags").innerHTML = r.tags
       .map(function (t) { return '<span class="tag">' + t + "</span>"; })
       .join("");
-    document.getElementById("modalIng").innerHTML = r.ingredients
-      .map(function (x) { return "<li>" + x + "</li>"; })
-      .join("");
+    document.getElementById("modalIng").innerHTML = "";
+    renderCurIngredients();
+    renderCurNutrition();
+    updateFavBtn();
+    updateServePills();
+
+    // Schema.org 结构化数据（Recipe）
+    if (CX.seo && CX.seo.recipe) CX.seo.recipe(r, cat.name);
 
     // 做法步骤（含变体 tab）
     var variants = r.variants || [];
@@ -227,6 +330,12 @@
   function bind() {
     var grid = document.getElementById("grid");
     grid.addEventListener("click", function (e) {
+      var favBtn = e.target.closest(".card-fav");
+      if (favBtn) {
+        e.stopPropagation();
+        toggleFavFromCard(parseInt(favBtn.dataset.fav, 10));
+        return;
+      }
       var card = e.target.closest(".card");
       if (card) openModal(parseInt(card.dataset.id, 10), filtered());
     });
@@ -236,6 +345,8 @@
       if (!btn) return;
       if (btn.dataset.remote) {
         state.remote = !state.remote;
+      } else if (btn.dataset.fav) {
+        state.fav = !state.fav;
       } else {
         state.cat = btn.dataset.cat;
       }
@@ -283,7 +394,7 @@
     document.getElementById("randomBtn").addEventListener("click", randomPick);
     document.getElementById("randomHero").addEventListener("click", randomPick);
     document.getElementById("resetBtn").addEventListener("click", function () {
-      state.kw = ""; state.cat = "all"; state.sort = "default"; state.remote = false;
+      state.kw = ""; state.cat = "all"; state.sort = "default"; state.remote = false; state.fav = false;
       search.value = ""; sort.value = "default";
       renderPills();
       renderGrid();
@@ -313,6 +424,171 @@
         var t = document.querySelector(a.getAttribute("href"));
         if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth" }); }
       });
+    });
+
+    // ===== 收藏 / 人数换算 / 购物清单 / 食材找菜 =====
+    var mFav = document.getElementById("mFav");
+    if (mFav) {
+      mFav.addEventListener("click", function () {
+        if (curRecipe && CX.fav) {
+          CX.fav.toggle(curRecipe.id);
+          updateFavBtn();
+          renderGrid();
+          renderPills();
+        }
+      });
+    }
+
+    var mShop = document.getElementById("mShop");
+    if (mShop) {
+      mShop.addEventListener("click", function () {
+        if (curRecipe && CX.shop) {
+          CX.shop.add(curRecipe.id);
+          renderShopList();
+          mShop.textContent = "✅ 已加入";
+          setTimeout(function () { mShop.textContent = "🧺 加入购物清单"; }, 1200);
+        }
+      });
+    }
+
+    var servePills = document.getElementById("servePills");
+    if (servePills) {
+      servePills.addEventListener("click", function (e) {
+        var b = e.target.closest(".serve-pill");
+        if (!b) return;
+        curServe = parseInt(b.dataset.s, 10);
+        updateServePills();
+        renderCurIngredients();
+      });
+    }
+
+    // 有什么吃什么（按食材找菜）
+    var ingOverlay = document.getElementById("ingOverlay");
+    var ingInput = document.getElementById("ingInput");
+    var ingKeywords = document.getElementById("ingKeywords");
+    var ingResult = document.getElementById("ingResult");
+    if (ingOverlay) {
+      document.getElementById("ingOpen").addEventListener("click", function () {
+        ingOverlay.classList.add("open");
+        document.body.classList.add("lock");
+        renderIngKeywords();
+        renderIngResult(ingInput.value);
+        setTimeout(function () { ingInput.focus(); }, 60);
+      });
+      document.getElementById("ingClose").addEventListener("click", closeIng);
+      ingOverlay.addEventListener("click", function (e) { if (e.target === this) closeIng(); });
+      ingInput.addEventListener("input", function () { renderIngResult(ingInput.value); });
+    }
+    function closeIng() {
+      ingOverlay.classList.remove("open");
+      document.body.classList.remove("lock");
+    }
+    function renderIngKeywords() {
+      if (!ingKeywords) return;
+      var kws = CX.ing && CX.ing.mainKeywords ? CX.ing.mainKeywords() : [];
+      var scores = {};
+      RECIPES.forEach(function (r) {
+        var text = (r.ingredients || []).join(" ");
+        kws.forEach(function (k) {
+          if (text.indexOf(k) >= 0) scores[k] = (scores[k] || 0) + 1;
+        });
+      });
+      var popular = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; }).slice(0, 24);
+      ingKeywords.innerHTML = popular.map(function (k) {
+        return '<button type="button" class="ing-kw">' + k + "</button>";
+      }).join("");
+      ingKeywords.querySelectorAll(".ing-kw").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          ingInput.value = btn.textContent;
+          renderIngResult(ingInput.value);
+        });
+      });
+    }
+    function renderIngResult(q) {
+      if (!ingResult) return;
+      q = (q || "").trim();
+      var hits = CX.ing && CX.ing.find ? CX.ing.find(RECIPES, q) : [];
+      if (!q) {
+        ingResult.innerHTML = '<div class="ing-empty">输入或点选上面的食材，看看能做什么菜。</div>';
+        return;
+      }
+      if (!hits.length) {
+        ingResult.innerHTML = '<div class="ing-empty">没找到用「' + q + '」的菜，换个食材试试？</div>';
+        return;
+      }
+      ingResult.innerHTML = hits.map(function (r) {
+        var cat = CATS[r.cat];
+        return '<button type="button" class="ing-hit" data-id="' + r.id + '">' +
+          '<span class="ih-emoji">' + r.emoji + "</span>" +
+          '<span class="ih-name">' + r.name + "</span>" +
+          '<span class="ih-cat">' + cat.name + "</span>" +
+          "</button>";
+      }).join("");
+      ingResult.querySelectorAll(".ing-hit").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          closeIng();
+          openModal(parseInt(btn.dataset.id, 10), RECIPES);
+        });
+      });
+    }
+
+    // 购物清单
+    var shopOverlay = document.getElementById("shopOverlay");
+    if (shopOverlay) {
+      document.getElementById("shopOpen").addEventListener("click", function () {
+        renderShopList();
+        shopOverlay.classList.add("open");
+        document.body.classList.add("lock");
+      });
+      document.getElementById("shopClose").addEventListener("click", closeShop);
+      shopOverlay.addEventListener("click", function (e) { if (e.target === this) closeShop(); });
+      document.getElementById("shopClear").addEventListener("click", function () {
+        if (CX.shop) CX.shop.clear();
+        renderShopList();
+      });
+      document.getElementById("shopCopy").addEventListener("click", copyShopList);
+    }
+    function closeShop() {
+      shopOverlay.classList.remove("open");
+      document.body.classList.remove("lock");
+    }
+    function copyShopList() {
+      var groups = CX.shop ? CX.shop.aggregate(byIdMap()) : [];
+      var total = 0;
+      groups.forEach(function (g) { total += g.items.length; });
+      if (!total) return;
+      var text = groups.map(function (g) {
+        var lines = ["【" + g.label + "】"];
+        g.items.forEach(function (it) {
+          lines.push("□ " + it.text + (it.count > 1 ? " ×" + it.count : ""));
+        });
+        return lines.join("\n");
+      }).join("\n\n");
+      var done = function () {
+        var btn = document.getElementById("shopCopy");
+        if (btn) { btn.textContent = "✅ 已复制"; setTimeout(function () { btn.textContent = "📋 复制清单"; }, 1200); }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+    function fallbackCopy(text, done) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      if (ingOverlay && ingOverlay.classList.contains("open")) closeIng();
+      else if (shopOverlay && shopOverlay.classList.contains("open")) closeShop();
     });
 
     // ===== 一键点菜 =====
@@ -401,6 +677,11 @@
   function initChart() {
     var el = document.getElementById("catChart");
     if (!el || typeof echarts === "undefined") return;
+    // 防止重复初始化导致分布图叠加渲染两次
+    if (el.__cxChartInited) return;
+    el.__cxChartInited = true;
+    var existing = echarts.getInstanceByDom ? echarts.getInstanceByDom(el) : null;
+    if (existing) existing.dispose();
     var style = getComputedStyle(document.documentElement);
     var accent = style.getPropertyValue("--accent").trim();
     var accent2 = style.getPropertyValue("--accent2").trim();
@@ -467,15 +748,6 @@
   function initStats() {
     var el = document.getElementById("statTotal");
     if (el) el.textContent = RECIPES.length;
-    var easy = RECIPES.filter(function (r) { return r.diff === 1; }).length;
-    var mid = RECIPES.filter(function (r) { return r.diff === 2; }).length;
-    var hard = RECIPES.filter(function (r) { return r.diff === 3; }).length;
-    var el2 = document.getElementById("statEasy");
-    var el3 = document.getElementById("statMid");
-    var el4 = document.getElementById("statHard");
-    if (el2) el2.textContent = easy;
-    if (el3) el3.textContent = mid;
-    if (el4) el4.textContent = hard;
   }
 
   function deepLink() {
@@ -496,6 +768,10 @@
     renderGrid();
     bind();
     initChart();
+    renderShopList();
+    // 全站 ItemList 结构化数据 + PWA 注册
+    if (CX.seo && CX.seo.itemList) CX.seo.itemList(RECIPES);
+    if (CX.pwa && CX.pwa.register) CX.pwa.register();
     // 初始 hash 可能尚未就绪，分两步处理确保深链可靠
     setTimeout(function () { deepLink(); }, 300);
   });

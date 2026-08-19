@@ -1,0 +1,26 @@
+{
+  "name": "慈溪味 · 慈溪家常菜谱",
+  "short_name": "慈溪味",
+  "description": "234 道慈溪本地家常菜谱，含食材找菜、购物清单、人数换算与营养参考",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf6f0",
+  "theme_color": "#a8462e",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
