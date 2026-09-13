@@ -2,7 +2,15 @@
 (function () {
   "use strict";
 
-  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10);
+  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10, RECIPES_11);
+
+  // 挂载「做法变体」：VARIANT_LIB 以菜名索引，避免与 id 强耦合
+  if (typeof VARIANT_LIB !== "undefined") {
+    RECIPES.forEach(function (r) {
+      var extra = VARIANT_LIB[r.name];
+      if (extra && extra.length) r.variants = (r.variants || []).concat(extra);
+    });
+  }
 
   var CATS = {
     sea:     { name: "海鲜",   emoji: "🦀", cls: "c-sea" },
