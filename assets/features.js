@@ -208,6 +208,59 @@
     { k: "桂圆", g: "水果", main: 1, kcal: 71, p: 1.2, f: 0.1, c: 16.6, u: 20 },
     { k: "枸杞", g: "水果", main: 0, kcal: 258, p: 13.9, f: 1.5, c: 64.1, u: 10 },
     { k: "蜂蜜", g: "水果", main: 0, kcal: 321, p: 0.4, f: 1.9, c: 75.6, u: 15 },
+    /* 慈溪本地食材与土名（与方言词典对应，让「以料找菜」认得本地叫法） */
+    { k: "望潮", g: "海鲜", main: 1, kcal: 82, p: 18.9, f: 0.4, c: 0, u: 300 },
+    { k: "章鱼", g: "海鲜", main: 1, kcal: 82, p: 18.9, f: 0.4, c: 0, u: 300 },
+    { k: "弹涂鱼", g: "海鲜", main: 1, kcal: 100, p: 18.0, f: 2.5, c: 0, u: 150 },
+    { k: "弹胡", g: "海鲜", main: 1, kcal: 100, p: 18.0, f: 2.5, c: 0, u: 150 },
+    { k: "蛎黄", g: "海鲜", main: 1, kcal: 73, p: 9.0, f: 2.5, c: 4.0, u: 500 },
+    { k: "牡蛎", g: "海鲜", main: 1, kcal: 73, p: 9.0, f: 2.5, c: 4.0, u: 500 },
+    { k: "淡菜", g: "海鲜", main: 1, kcal: 80, p: 11.4, f: 1.7, c: 4.7, u: 300 },
+    { k: "银鱼", g: "海鲜", main: 1, kcal: 105, p: 17.2, f: 4.0, c: 0, u: 100 },
+    { k: "虾潺", g: "海鲜", main: 1, kcal: 90, p: 16.0, f: 2.0, c: 0, u: 400 },
+    { k: "龙头鱼", g: "海鲜", main: 1, kcal: 90, p: 16.0, f: 2.0, c: 0, u: 400 },
+    { k: "米鱼", g: "海鲜", main: 1, kcal: 110, p: 18.0, f: 3.5, c: 0, u: 600 },
+    { k: "箬鳎", g: "海鲜", main: 1, kcal: 83, p: 17.7, f: 1.4, c: 0, u: 400 },
+    { k: "鲚鱼", g: "海鲜", main: 1, kcal: 100, p: 16.0, f: 3.5, c: 0, u: 200 },
+    { k: "鱼鲞", g: "海鲜", main: 1, kcal: 250, p: 35.0, f: 8.0, c: 0, u: 100 },
+    { k: "黄鱼鲞", g: "海鲜", main: 1, kcal: 250, p: 35.0, f: 8.0, c: 0, u: 100 },
+    { k: "鳗鲞", g: "海鲜", main: 1, kcal: 250, p: 35.0, f: 10.0, c: 0, u: 80 },
+    { k: "海蛳螺", g: "海鲜", main: 1, kcal: 70, p: 11.0, f: 1.2, c: 2.0, u: 300 },
+    { k: "河鳗", g: "河鲜", main: 1, kcal: 181, p: 18.6, f: 12.2, c: 0, u: 500 },
+    { k: "黑鱼", g: "河鲜", main: 1, kcal: 85, p: 18.5, f: 1.2, c: 0, u: 600 },
+    { k: "甲鱼", g: "河鲜", main: 1, kcal: 118, p: 17.8, f: 4.3, c: 0, u: 600 },
+    { k: "本江鳖", g: "河鲜", main: 1, kcal: 118, p: 17.8, f: 4.3, c: 0, u: 600 },
+    { k: "夜开花", g: "蔬菜", main: 1, kcal: 15, p: 0.7, f: 0.1, c: 3.5, u: 300 },
+    { k: "蒲瓜", g: "蔬菜", main: 1, kcal: 15, p: 0.7, f: 0.1, c: 3.5, u: 300 },
+    { k: "瓠瓜", g: "蔬菜", main: 1, kcal: 15, p: 0.7, f: 0.1, c: 3.5, u: 300 },
+    { k: "带豆", g: "蔬菜", main: 1, kcal: 29, p: 2.1, f: 0.2, c: 4.6, u: 200 },
+    { k: "红菱", g: "蔬菜", main: 1, kcal: 98, p: 3.6, f: 0.5, c: 21.4, u: 200 },
+    { k: "菱角", g: "蔬菜", main: 1, kcal: 98, p: 3.6, f: 0.5, c: 21.4, u: 200 },
+    { k: "荸荠", g: "蔬菜", main: 1, kcal: 61, p: 1.2, f: 0.2, c: 14.2, u: 150 },
+    { k: "蒲荠", g: "蔬菜", main: 1, kcal: 61, p: 1.2, f: 0.2, c: 14.2, u: 150 },
+    { k: "大头菜", g: "蔬菜", main: 1, kcal: 25, p: 1.5, f: 0.2, c: 4.5, u: 200 },
+    { k: "菜蕻", g: "蔬菜", main: 1, kcal: 25, p: 2.0, f: 0.2, c: 3.5, u: 200 },
+    { k: "天菜", g: "蔬菜", main: 1, kcal: 25, p: 2.0, f: 0.2, c: 3.5, u: 200 },
+    { k: "榨菜", g: "蔬菜", main: 1, kcal: 29, p: 2.0, f: 0.3, c: 4.4, u: 80 },
+    { k: "雪菜", g: "蔬菜", main: 1, kcal: 25, p: 1.5, f: 0.2, c: 4.0, u: 100 },
+    { k: "雪里蕻", g: "蔬菜", main: 1, kcal: 25, p: 1.5, f: 0.2, c: 4.0, u: 100 },
+    { k: "咸菜", g: "蔬菜", main: 1, kcal: 25, p: 1.5, f: 0.2, c: 4.0, u: 100 },
+    { k: "笋干菜", g: "菌菇", main: 1, kcal: 30, p: 2.5, f: 0.2, c: 4.5, u: 30 },
+    { k: "梅干菜", g: "菌菇", main: 1, kcal: 200, p: 8.0, f: 1.5, c: 40.0, u: 40 },
+    { k: "霉干菜", g: "菌菇", main: 1, kcal: 200, p: 8.0, f: 1.5, c: 40.0, u: 40 },
+    { k: "干菜", g: "菌菇", main: 1, kcal: 200, p: 8.0, f: 1.5, c: 40.0, u: 40 },
+    { k: "菜蕻干", g: "菌菇", main: 1, kcal: 200, p: 10.0, f: 1.0, c: 38.0, u: 20 },
+    { k: "倭豆", g: "蛋豆", main: 1, kcal: 111, p: 8.8, f: 0.4, c: 19.5, u: 200 },
+    { k: "酱肉", g: "肉类", main: 1, kcal: 420, p: 15.0, f: 38.0, c: 2.5, u: 150 },
+    { k: "米馒头", g: "主食", main: 1, kcal: 223, p: 7.0, f: 1.1, c: 47.0, u: 100 },
+    { k: "麻糍", g: "主食", main: 1, kcal: 232, p: 4.0, f: 1.2, c: 50.0, u: 100 },
+    { k: "灰汁团", g: "主食", main: 1, kcal: 200, p: 2.0, f: 0.5, c: 46.0, u: 80 },
+    { k: "艾青饺", g: "主食", main: 1, kcal: 210, p: 4.0, f: 2.0, c: 44.0, u: 100 },
+    { k: "擂金团", g: "主食", main: 1, kcal: 300, p: 5.0, f: 8.0, c: 52.0, u: 80 },
+    { k: "烧饼", g: "主食", main: 1, kcal: 300, p: 8.0, f: 10.0, c: 45.0, u: 120 },
+    { k: "豆酥糖", g: "水果", main: 1, kcal: 400, p: 4.0, f: 12.0, c: 70.0, u: 30 },
+    { k: "藕丝糖", g: "水果", main: 1, kcal: 390, p: 1.0, f: 3.0, c: 86.0, u: 30 },
+
     /* 调料（main=0 不参与主料匹配） */
     { k: "酱油", g: "调料", main: 0, kcal: 63, p: 5.6, f: 0.1, c: 10.1, u: 15 },
     { k: "生抽", g: "调料", main: 0, kcal: 63, p: 5.6, f: 0.1, c: 10.1, u: 15 },
@@ -327,6 +380,160 @@
     return arr;
   }
 
+  /* ---------- 2b. 以料找菜：多食材反查，并算出差哪几样 ---------- */
+  // 本地叫法与标准名互认：输入「蛎黄」也能认出「生蚝」，「弹涂」也能认出「弹涂鱼」
+  function dialectForms(term) {
+    var out = [term];
+    if (typeof DIALECT === "undefined") return out;
+    for (var i = 0; i < DIALECT.length; i++) {
+      var e = DIALECT[i];
+      if (e.g === "饮食说法") continue;
+      var forms = [e.t].concat(e.a || []);
+      if (e.s) forms.push(e.s);
+      if (forms.indexOf(term) < 0) continue;
+      for (var j = 0; j < forms.length; j++) {
+        if (forms[j] && out.indexOf(forms[j]) < 0) out.push(forms[j]);
+      }
+    }
+    return out;
+  }
+
+  // 输入串拆成食材词：空格、顿号、逗号、加号、斜杠都算分隔
+  function splitPantry(q) {
+    return String(q || "")
+      .split(/[\s、，,＋+\/／;；]+/)
+      .map(function (s) { return s.trim(); })
+      .filter(function (s) { return s.length > 0; });
+  }
+
+  // 一道菜用到的主料词条（去重）
+  function mainEntriesOf(r) {
+    var out = [], seen = {};
+    (r.ingredients || []).forEach(function (s) {
+      var e = matchLongest(s);
+      if (e && e.main && !seen[e.k]) { seen[e.k] = 1; out.push(e); }
+    });
+    return out;
+  }
+
+  // 一个食材词能否对上某个词条（含本地叫法互认）
+  // 只有「词条名包含你手上的这个词」才算对上：有「虾」能做虾仁菜，有「虾潺」不算有「虾」
+  function tokenHitsEntry(token, e) {
+    var forms = dialectForms(token);
+    for (var i = 0; i < forms.length; i++) {
+      var f = forms[i];
+      if (!f) continue;
+      if (e.k.indexOf(f) >= 0) return true;
+    }
+    return false;
+  }
+
+  // 反查：返回 [{r, have, miss, score}]，按「差得少」优先
+  function findByPantry(recipes, tokens) {
+    if (!tokens || !tokens.length) return [];
+    var res = [];
+    (recipes || []).forEach(function (r) {
+      var mains = mainEntriesOf(r);
+      if (!mains.length) return;
+      var have = [], miss = [];
+      mains.forEach(function (e) {
+        var ok = false;
+        for (var i = 0; i < tokens.length && !ok; i++) ok = tokenHitsEntry(tokens[i], e);
+        if (ok) have.push(e.k); else miss.push(e.k);
+      });
+      if (!have.length) return;
+      res.push({ r: r, have: have, miss: miss, total: mains.length, score: have.length / mains.length });
+    });
+    res.sort(function (a, b) {
+      if (a.miss.length !== b.miss.length) return a.miss.length - b.miss.length;
+      if (b.have.length !== a.have.length) return b.have.length - a.have.length;
+      if (b.score !== a.score) return b.score - a.score;
+      return a.r.id - b.r.id;
+    });
+    return res;
+  }
+
+  /* ---------- 2c. 备菜：按「下锅前先做什么」归类食材 ---------- */
+  // "三北笋干菜 50克" -> "三北笋干菜"
+  function ingName(s) {
+    s = String(s || "").trim();
+    var m = s.match(/^([^\d\s]+)/);
+    var n = m ? m[1] : s;
+    n = n.replace(/[（(].*$/, "").trim();
+    return n || s;
+  }
+
+  function prepOf(text) {
+    var s = String(text || "");
+    var best = null;
+    if (typeof PREP_RULES !== "undefined") {
+      for (var i = 0; i < PREP_RULES.length; i++) {
+        var r = PREP_RULES[i];
+        if (s.indexOf(r.k) >= 0 && (!best || r.k.length > best.k.length)) best = r;
+      }
+    }
+    if (best) return { g: best.g, tip: best.tip };
+    return { g: "洗净备好", tip: "" };
+  }
+
+  function prepMeta(g) {
+    return (typeof PREP_META !== "undefined" && PREP_META[g]) || { hint: "", dur: 0 };
+  }
+
+  // 一道菜的备菜清单：[{g, hint, dur, items:[{name, tip}]}]
+  function prepGroups(ingredients) {
+    var acc = {}, order = [];
+    (ingredients || []).forEach(function (line) {
+      var name = ingName(line);
+      if (!name) return;
+      if ((typeof PREP_SKIP !== "undefined" ? PREP_SKIP : []).indexOf(name) >= 0) return;
+      if (isSeasoning(matchLongest(line))) return;
+      var p = prepOf(line);
+      if (!acc[p.g]) { acc[p.g] = { g: p.g, items: [] }; order.push(p.g); }
+      acc[p.g].items.push({ name: name, tip: p.tip });
+    });
+    var out = [];
+    (typeof PREP_ORDER !== "undefined" ? PREP_ORDER : order).forEach(function (g) {
+      if (!acc[g]) return;
+      var meta = prepMeta(g);
+      out.push({ g: g, hint: meta.hint, dur: meta.dur, items: acc[g].items });
+    });
+    var lead = 0;
+    out.forEach(function (x) { if (x.g !== "洗净备好" && x.dur > lead) lead = x.dur; });
+    return { groups: out, lead: lead };
+  }
+
+  /* ---------- 2d. 本周菜单（localStorage） ---------- */
+  var LS_WEEK = "cx_week";
+  var WEEK_DAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+  function weekGet() {
+    var v = readLS(LS_WEEK);
+    return (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+  }
+  function weekSet(obj) { writeLS(LS_WEEK, obj); }
+  function weekAdd(day, id) {
+    var w = weekGet();
+    if (!w[day]) w[day] = [];
+    if (w[day].indexOf(id) < 0) w[day].push(id);
+    weekSet(w);
+  }
+  function weekRemove(day, id) {
+    var w = weekGet();
+    if (!w[day]) return;
+    var i = w[day].indexOf(id);
+    if (i >= 0) w[day].splice(i, 1);
+    weekSet(w);
+  }
+  function weekClear() { writeLS(LS_WEEK, {}); }
+  function weekIds() {
+    var w = weekGet(), out = [];
+    WEEK_DAYS.forEach(function (d) {
+      (w[d] || []).forEach(function (id) { if (out.indexOf(id) < 0) out.push(id); });
+    });
+    return out;
+  }
+  function weekCount() { return weekIds().length; }
+
   /* ---------- 5. 营养 / 卡路里估算 ---------- */
   function toGrams(amount, unit) {
     var u = (unit || "").toLowerCase();
@@ -386,10 +593,10 @@
     return e && (e.g === "调料" || SPICE[e.k]);
   }
 
-  function shopAggregate(recipesById) {
-    // recipesById: id -> recipe 对象
+  function shopAggregate(recipesById, idList) {
+    // recipesById: id -> recipe 对象；idList 省略时取购物清单
     // 返回分组结构：[{label, tag, items:[{text, count}]}]，tag: food|seasoning|other
-    var ids = shopGet();
+    var ids = idList || shopGet();
     var groups = {};      // label -> {label, tag, items:{key->{text,count}}, itemOrder:[]}
     var hasSeasoning = false;
     var hasOther = false;
@@ -440,6 +647,45 @@
       var og = groups["其他"];
       out.push({ label: og.label, tag: og.tag, items: toItems(og) });
     }
+    return out;
+  }
+
+  /* ---------- 3b. 备菜视角的聚合：按「下锅前先做什么」分组 ---------- */
+  function shopAggregateByPrep(recipesById, idList) {
+    var ids = idList || shopGet();
+    var acc = {}, order = [];
+    function bump(label, tag, key, text, tip) {
+      if (!acc[label]) {
+        acc[label] = { label: label, tag: tag, items: [], seen: {} };
+        order.push(label);
+      }
+      var g = acc[label];
+      if (g.seen[key]) { g.seen[key].count += 1; return; }
+      g.seen[key] = { text: text, tip: tip || "", count: 1 };
+      g.items.push(g.seen[key]);
+    }
+    ids.forEach(function (id) {
+      var r = recipesById[id];
+      if (!r) return;
+      (r.ingredients || []).forEach(function (s) {
+        var name = ingName(s);
+        if (!name) return;
+        if (PREP_SKIP.indexOf(name) >= 0) return;
+        var e = matchLongest(s);
+        if (isSeasoning(e)) { bump("调料香料", "seasoning", e.k, e.k, ""); return; }
+        var p = prepOf(s);
+        bump(p.g, "prep", name + "|" + p.tip, name, p.tip);
+      });
+    });
+    var out = [];
+    PREP_ORDER.forEach(function (g) {
+      if (acc[g]) out.push(acc[g]);
+    });
+    if (acc["调料香料"]) out.push(acc["调料香料"]);
+    out.forEach(function (g) {
+      var meta = prepMeta(g.label);
+      g.hint = meta.hint || "";
+    });
     return out;
   }
 
@@ -505,8 +751,19 @@
   /* ---------- 导出 API ---------- */
   window.CX = {
     fav: { get: getFavs, is: isFav, toggle: toggleFav, count: favCount },
-    shop: { get: shopGet, has: shopHas, add: shopAdd, remove: shopRemove, addMany: shopAddMany, clear: shopClear, aggregate: shopAggregate },
+    shop: {
+      get: shopGet, has: shopHas, add: shopAdd, remove: shopRemove,
+      addMany: shopAddMany, clear: shopClear,
+      aggregate: shopAggregate, aggregatePrep: shopAggregateByPrep
+    },
     ing: { find: findByIngredient, mainKeywords: mainKeywords },
+    pantry: { find: findByPantry, split: splitPantry, mainEntries: mainEntriesOf, matchEntry: tokenHitsEntry },
+    prep: { of: prepOf, groups: prepGroups, name: ingName, meta: prepMeta, order: (typeof PREP_ORDER !== "undefined" ? PREP_ORDER : []) },
+    week: {
+      days: WEEK_DAYS, get: weekGet, add: weekAdd, remove: weekRemove,
+      clear: weekClear, ids: weekIds, count: weekCount
+    },
+    dialect: { forms: dialectForms },
     scale: { one: scaleIngredient, list: scaleIngredients, parse: parseQty },
     nutrition: { calc: calcNutrition },
     seo: { recipe: injectRecipeJsonLd, itemList: injectItemListJsonLd },

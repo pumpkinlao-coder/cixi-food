@@ -792,6 +792,156 @@ sup a:hover { text-decoration: underline; }
 .ih-name { flex: 1; font-size: 0.95rem; font-weight: 600; color: var(--ink); }
 .ih-cat { font-size: 0.76rem; color: var(--muted); flex: none; }
 .ing-empty { text-align: center; color: var(--muted); padding: 1.6rem 0.5rem; font-size: 0.9rem; }
+
+/* ===== 增强功能二批：以料找菜 / 备菜 / 做菜模式 / 本地叫法 / 本周菜单 ===== */
+[hidden] { display: none !important; }
+
+/* 顶部工具栏按钮的文字，窄屏只留图标 */
+.nt-label { margin-left: 0.1rem; }
+
+/* 以料找菜：已选食材与「只看能做的」 */
+.ing-tokens { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.7rem; min-height: 1.9rem; }
+.ing-tokens-hint { font-size: 0.82rem; color: var(--muted); }
+.ing-token {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem 0.55rem 0.25rem 0.7rem; border-radius: 999px;
+  background: rgba(168,70,46,0.1); color: var(--accent); font-size: 0.84rem; font-weight: 600;
+}
+.ing-token i { font-style: normal; cursor: pointer; opacity: 0.6; font-size: 0.95rem; line-height: 1; }
+.ing-token i:hover { opacity: 1; }
+.ing-token-clear { border: none; background: transparent; color: var(--muted); font-size: 0.78rem; text-decoration: underline; }
+.ing-tools { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin: 0.9rem 0 0.1rem; }
+.ing-tools-label { font-size: 0.8rem; color: var(--muted); }
+.ing-ready {
+  border: 1px solid var(--rule); background: var(--bg2); color: var(--ink);
+  border-radius: 999px; padding: 0.3rem 0.85rem; font-size: 0.8rem; transition: all 0.16s;
+}
+.ing-ready:hover { border-color: var(--accent); color: var(--accent); }
+.ing-ready.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.ing-stat { font-size: 0.84rem; color: var(--muted); padding: 0.2rem 0.15rem 0.35rem; }
+.ing-stat b { color: var(--accent); font-family: var(--latin); }
+.ih-body { flex: 1; display: flex; flex-direction: column; gap: 0.12rem; min-width: 0; }
+.ih-body .ih-name { flex: none; }
+.ih-miss { font-size: 0.76rem; color: #a8462e; }
+.ih-ready { font-size: 0.76rem; color: var(--accent2); font-weight: 600; }
+.ih-score { flex: none; font-size: 0.78rem; color: var(--muted); font-family: var(--latin); }
+.ing-hit.is-ready { border-color: rgba(95,127,85,0.5); background: rgba(95,127,85,0.05); }
+
+/* 先备菜 */
+.prep-lead { font-size: 0.88rem; color: var(--muted); margin: 0.1rem 0 0.9rem; }
+.prep-lead b { color: var(--accent); }
+.prep-groups { display: grid; gap: 0.7rem; }
+.prep-group {
+  border: 1px solid var(--rule); border-left: 3px solid var(--gold);
+  border-radius: 12px; padding: 0.7rem 0.9rem; background: var(--bg2);
+}
+.prep-group.is-plain { border-left-color: var(--rule); background: rgba(46,38,32,0.02); }
+.prep-group-title {
+  display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap;
+  font-family: var(--serif); font-weight: 700; font-size: 0.98rem; margin-bottom: 0.4rem;
+}
+.prep-group-title span { font-family: var(--sans); font-weight: 400; font-size: 0.75rem; color: var(--muted); }
+.prep-items { list-style: none; display: grid; gap: 0.25rem; }
+.prep-items li { display: flex; align-items: baseline; gap: 0.55rem; flex-wrap: wrap; font-size: 0.88rem; }
+.prep-name { font-weight: 600; }
+.prep-tip { font-size: 0.8rem; color: var(--muted); }
+
+/* 购物清单：清单 / 本周菜单 双页签 */
+.shop-tabs { display: flex; gap: 0.4rem; margin: -0.2rem 0 0.9rem; }
+.shop-tab {
+  flex: 1; border: 1px solid var(--rule); background: var(--bg2); color: var(--ink);
+  border-radius: 999px; padding: 0.45rem 0.6rem; font-size: 0.86rem; font-weight: 600; transition: all 0.16s;
+}
+.shop-tab:hover { border-color: var(--accent); color: var(--accent); }
+.shop-tab.active { background: var(--ink); color: var(--bg2); border-color: var(--ink); }
+.shop-group-hint { font-family: var(--sans); font-weight: 400; font-style: normal; font-size: 0.74rem; color: var(--muted); }
+.shop-items li .sl-text { flex: 1; }
+.shop-items li .sl-tip { flex: none; font-size: 0.76rem; color: var(--muted); }
+
+/* 本周菜单 */
+.week-tip { font-size: 0.86rem; color: var(--muted); margin: 0.1rem 0 0.9rem; }
+.week-days { display: grid; gap: 0.55rem; }
+.week-day {
+  display: flex; gap: 0.7rem; align-items: flex-start;
+  padding: 0.6rem 0.7rem; border: 1px solid var(--rule); border-radius: 12px; background: var(--bg2);
+}
+.week-day-name { flex: none; width: 2.7rem; font-family: var(--serif); font-weight: 700; font-size: 0.9rem; color: var(--accent); padding-top: 0.2rem; }
+.week-day-body { flex: 1; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.week-empty { font-size: 0.82rem; color: var(--muted); }
+.week-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.25rem 0.3rem 0.25rem 0.7rem; border-radius: 999px;
+  background: rgba(46,38,32,0.05); font-size: 0.84rem;
+}
+.week-chip b { font-weight: 600; cursor: pointer; }
+.week-chip b:hover { color: var(--accent); }
+.week-chip i { font-style: normal; cursor: pointer; color: var(--muted); padding: 0 0.25rem; }
+.week-chip i:hover { color: var(--accent); }
+.week-add { border: 1px dashed var(--rule); background: transparent; color: var(--muted); border-radius: 999px; padding: 0.22rem 0.65rem; font-size: 0.8rem; }
+.week-add:hover { border-color: var(--accent); color: var(--accent); }
+.week-picker { margin-top: 1rem; border-top: 1px dashed var(--rule); padding-top: 0.9rem; }
+.week-pick-head { font-family: var(--serif); font-size: 0.9rem; font-weight: 700; margin-bottom: 0.6rem; }
+.week-picker-list { display: grid; gap: 0.4rem; max-height: 38vh; overflow-y: auto; margin-top: 0.6rem; }
+.wp-item {
+  display: flex; align-items: center; gap: 0.5rem; width: 100%; text-align: left;
+  border: 1px solid var(--rule); background: var(--bg2); border-radius: 10px;
+  padding: 0.5rem 0.7rem; font-size: 0.9rem; font-family: var(--sans); transition: all 0.16s;
+}
+.wp-item:hover { border-color: var(--accent); color: var(--accent); }
+.wp-item .ih-cat { margin-left: auto; }
+
+/* 做菜模式 */
+.cook-modal { width: min(680px, 100%); }
+.cook-bar { display: flex; align-items: center; gap: 0.7rem; margin-top: 1.1rem; font-size: 0.82rem; color: var(--muted); }
+.cook-progress { flex: 1; height: 6px; border-radius: 999px; background: var(--rule); overflow: hidden; }
+.cook-progress i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.25s; }
+.cook-keep { flex: none; font-size: 0.72rem; color: var(--accent2); border: 1px solid rgba(95,127,85,0.35); border-radius: 999px; padding: 0.08rem 0.5rem; }
+.cook-step-body {
+  margin: 1.2rem 0 1rem; padding: 1.4rem 1.3rem; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(168,70,46,0.05), rgba(197,154,75,0.07));
+  border: 1px solid var(--rule);
+}
+.cook-text { font-family: var(--serif); font-size: 1.45rem; line-height: 1.85; cursor: pointer; user-select: none; }
+.cook-text.done { color: var(--muted); text-decoration: line-through; }
+.cook-timer { margin-top: 1rem; }
+.cook-timer.running { background: var(--accent2); }
+.cook-hint { margin-top: 0.9rem; font-size: 0.78rem; color: var(--muted); }
+.cook-dots { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 1rem; }
+.cook-dot { width: 1.6rem; height: 0.45rem; border: none; border-radius: 999px; background: var(--rule); padding: 0; }
+.cook-dot.done { background: var(--accent2); }
+.cook-dot.on { background: var(--accent); }
+.cook-actions { display: flex; gap: 0.6rem; }
+.cook-actions .btn { flex: 1; justify-content: center; }
+
+/* 本地叫法词典 */
+.dialect-modal { width: min(720px, 100%); max-height: 88vh; display: flex; flex-direction: column; }
+.dialect-list { overflow-y: auto; display: grid; gap: 0.7rem; padding: 0.2rem 0.2rem 0.4rem; }
+.dl-card { border: 1px solid var(--rule); border-radius: 14px; padding: 0.85rem 1rem; background: var(--bg2); }
+.dl-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.dl-head b { font-family: var(--serif); font-size: 1.1rem; }
+.dl-std { font-size: 0.86rem; color: var(--accent); }
+.dl-sc { font-size: 0.72rem; color: #8a6d3b; border: 1px solid rgba(197,154,75,0.45); border-radius: 999px; padding: 0.04rem 0.45rem; }
+.dl-alt { display: block; font-size: 0.76rem; color: var(--muted); margin-top: 0.15rem; }
+.dl-note { font-size: 0.86rem; color: var(--muted); margin: 0.35rem 0 0.6rem; }
+.dl-foot { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.dl-go {
+  border: 1px solid var(--rule); background: transparent; color: var(--accent);
+  font-size: 0.82rem; font-weight: 600; border-radius: 999px; padding: 0.3rem 0.85rem; transition: all 0.16s;
+}
+.dl-go:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.dl-none { font-size: 0.8rem; color: var(--muted); }
+.dl-foot a { font-size: 0.74rem; color: var(--muted); margin-left: auto; }
+
+@media (max-width: 640px) {
+  .nt-label { display: none; }
+  .cook-text { font-size: 1.2rem; }
+  .cook-modal, .dialect-modal { padding: 1.3rem 1rem 1.1rem; }
+  .week-day { flex-direction: column; gap: 0.35rem; }
+  .week-day-name { width: auto; padding-top: 0; }
+  .shop-actions { flex-wrap: wrap; }
+  .shop-actions .btn { flex: 1 1 auto; justify-content: center; }
+  .ing-tools { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
@@ -807,9 +957,10 @@ sup a:hover { text-decoration: underline; }
       <a href="#flavor">风味简介</a>
       <a href="#data">数据一览</a>
       <a href="#about">关于本站</a>
-      <button class="btn nav-tool" id="ingOpen" type="button">🍳 有什么吃什么</button>
-      <button class="btn nav-tool" id="shopOpen" type="button">🧺 购物清单<span class="nav-count" id="shopCount">0</span></button>
-      <button class="btn btn-accent" id="randomHero">🎲 今天吃什么</button>
+      <button class="btn nav-tool" id="ingOpen" type="button" title="说说家里有什么食材，看能凑出什么菜">🍳 <span class="nt-label">有什么吃什么</span></button>
+      <button class="btn nav-tool" id="dialectOpen" type="button" title="慈溪本地叫法词典">📖 <span class="nt-label">本地叫法</span></button>
+      <button class="btn nav-tool" id="shopOpen" type="button" title="采购清单与本周菜单">🧺 <span class="nt-label">清单与菜单</span><span class="nav-count" id="shopCount">0</span></button>
+      <button class="btn btn-accent" id="randomHero" type="button" title="随机来一道">🎲 <span class="nt-label">今天吃什么</span></button>
     </nav>
   </div>
 </header>
@@ -1034,19 +1185,35 @@ sup a:hover { text-decoration: underline; }
     <div class="about-features">
       <div class="about-feature">
         <h4>🔍 关键词搜索</h4>
-        <p>顶部搜索框输入菜名、食材或标签（如“黄鱼”“年糕”“杨梅”），实时过滤全部菜谱。</p>
+        <p>顶部搜索框输入菜名、食材或标签（如“黄鱼”“年糕”“杨梅”），实时过滤全部菜谱；本地叫法也认得，搜「倭豆」能找到蚕豆菜，搜「咸齑」能找到雪菜菜。</p>
       </div>
       <div class="about-feature">
-        <h4>🗂 分类与排序</h4>
-        <p>按八大类筛选浏览，也可按难度或用时排序，快速找到适合当下的一餐。</p>
+        <h4>🍳 以料找菜</h4>
+        <p>写下家里现有的几样食材，例如「蛎黄 年糕 雪菜」，会列出能碰上的菜、还差哪几样，也能只看「现在就能做」的那几道。</p>
       </div>
       <div class="about-feature">
-        <h4>📖 详情查看</h4>
-        <p>点击任意菜卡展开完整做法，支持“上一道 / 下一道”连续翻阅，键盘 ← → 亦可切换。</p>
+        <h4>🗂 分类与时令筛选</h4>
+        <p>按八大类浏览，也可按春/夏/秋/冬、按二十个乡镇筛选，或只看食材普通超市就买得到的「外地可做」。</p>
+      </div>
+      <div class="about-feature">
+        <h4>📖 本地叫法词典</h4>
+        <p>望潮、弹涂、倭豆、夜开花、咸齑、压饭榔头——一百多条慈溪土名，标出对应的普通话名与出处，每条都能直接跳到用得上它的菜。</p>
+      </div>
+      <div class="about-feature">
+        <h4>🥢 先备菜</h4>
+        <p>每道菜按「泡发 / 吐沙 / 焯水 / 上浆」把食材分好，标出最久要等多久，进门先把要泡的泡上，再回头切配。</p>
+      </div>
+      <div class="about-feature">
+        <h4>🔥 做菜模式</h4>
+        <p>点「开始做菜」进入大字步骤，一句一步，点文字打勾，步骤里带时间的可一键起计时，做菜时屏幕不熄。</p>
+      </div>
+      <div class="about-feature">
+        <h4>🧺 采购清单与本周菜单</h4>
+        <p>把要做的菜加进清单，食材自动汇总去重，可按「采购分区」一站一站买，也可按「处理方式」看回家先动哪样；排好一周的菜还能合并成一张采购单。</p>
       </div>
       <div class="about-feature">
         <h4>🎲 今天吃什么</h4>
-        <p>选择困难？点一下随机按钮，让缘分替你决定今晚的菜单。深链直达：<code>#recipe-15</code></p>
+        <p>选择困难就随机一道，或者用「一键点菜」按人数配一桌。深链直达某道菜：<code>#recipe-15</code></p>
       </div>
     </div>
 
@@ -1112,6 +1279,7 @@ sup a:hover { text-decoration: underline; }
     <div class="modal-toolbar">
       <button class="modal-action" id="mFav" type="button" aria-pressed="false" title="收藏这道菜">♡ 收藏</button>
       <button class="modal-action" id="mShop" type="button">🧺 加入购物清单</button>
+      <button class="modal-action" id="mCook" type="button" title="大字步骤、屏幕常亮、带计时">🔥 开始做菜</button>
     </div>
     <section class="modal-section">
       <h3>材料清单</h3>
@@ -1126,6 +1294,11 @@ sup a:hover { text-decoration: underline; }
       </div>
       <ul class="ingredients" id="modalIng"></ul>
       <div class="modal-nutri" id="modalNutri" style="display:none"></div>
+    </section>
+    <section class="modal-section" id="prepSection" hidden>
+      <h3>先备菜</h3>
+      <p class="prep-lead" id="prepLead"></p>
+      <div class="prep-groups" id="prepGroups"></div>
     </section>
     <section class="modal-section">
       <h3>做法步骤</h3>
@@ -1214,7 +1387,12 @@ sup a:hover { text-decoration: underline; }
       <button class="modal-close" id="shopClose" aria-label="关闭">✕</button>
     </div>
 
-    <div class="shop-body">
+    <div class="shop-tabs">
+      <button class="shop-tab active" id="shopTabList" type="button">🧾 采购清单</button>
+      <button class="shop-tab" id="shopTabWeek" type="button">📅 本周菜单</button>
+    </div>
+
+    <div class="shop-body" id="shopPaneList">
       <div class="shop-empty" id="shopEmpty">
         <div class="big">🧺</div>
         <p>还没有加入任何菜谱。打开一道菜，点「加入购物清单」即可。</p>
@@ -1222,9 +1400,27 @@ sup a:hover { text-decoration: underline; }
       <div class="shop-list" id="shopList"></div>
     </div>
 
-    <div class="shop-actions">
+    <div class="shop-body" id="shopPaneWeek" hidden>
+      <p class="week-tip" id="weekSummary"></p>
+      <div class="week-days" id="weekDays"></div>
+      <div class="week-picker" id="weekPicker" hidden>
+        <div class="week-pick-head" id="weekPickLabel"></div>
+        <div class="ing-search">
+          <input type="search" id="weekSearch" placeholder="搜菜名或食材…" autocomplete="off">
+        </div>
+        <div class="week-picker-list" id="weekPickerList"></div>
+      </div>
+    </div>
+
+    <div class="shop-actions" id="shopActionsList">
       <button class="btn btn-ghost" id="shopClear" type="button">🗑 清空</button>
+      <button class="btn btn-ghost" id="shopView" type="button">🥢 按处理方式</button>
       <button class="btn btn-accent" id="shopCopy" type="button">📋 复制清单</button>
+    </div>
+    <div class="shop-actions" id="shopActionsWeek" hidden>
+      <button class="btn btn-ghost" id="weekClear" type="button">🗑 清空本周</button>
+      <button class="btn btn-ghost" id="weekCopy" type="button">📋 复制菜单</button>
+      <button class="btn btn-accent" id="weekMerge" type="button">🧺 合并成采购单</button>
     </div>
   </div>
 </div>
@@ -1244,10 +1440,68 @@ sup a:hover { text-decoration: underline; }
     </div>
 
     <div class="ing-search">
-      <input type="search" id="ingInput" placeholder="输入食材，如「黄鱼」「年糕」「雪菜」…" autocomplete="off">
+      <input type="search" id="ingInput" placeholder="家里有什么？多个用空格隔开，如「蛎黄 年糕 雪菜」" autocomplete="off">
+    </div>
+    <div class="ing-tokens" id="ingTokens"></div>
+    <div class="ing-tools">
+      <span class="ing-tools-label">常用食材</span>
+      <button class="ing-ready" id="ingReady" type="button" aria-pressed="false">只看现在就能做的</button>
     </div>
     <div class="ing-kws" id="ingKeywords"></div>
     <div class="ing-result" id="ingResult"></div>
+  </div>
+</div>
+
+<!-- ===== 做菜模式 ===== -->
+<div class="overlay" id="cookOverlay" role="dialog" aria-modal="true" aria-label="做菜模式">
+  <div class="modal cook-modal">
+    <div class="modal-head">
+      <div class="modal-head-l">
+        <span class="modal-emoji">🔥</span>
+        <div>
+          <h2 class="modal-title" id="cookName">做菜</h2>
+          <p class="modal-sub" id="cookVariant"></p>
+        </div>
+      </div>
+      <button class="modal-close" id="cookClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="cook-bar">
+      <span id="cookStepNo"></span>
+      <div class="cook-progress"><i id="cookProgress"></i></div>
+      <span class="cook-keep" title="做菜时屏幕不会自动熄灭">屏幕常亮</span>
+    </div>
+    <div class="cook-step-body">
+      <p class="cook-text" id="cookText"></p>
+      <button class="btn btn-accent cook-timer" id="cookTimer" type="button" hidden>⏱ 计时</button>
+      <p class="cook-hint">点一下文字，就是「这一步做完了」，再点一下取消；左右方向键也能翻步骤。</p>
+    </div>
+    <div class="cook-dots" id="cookDots"></div>
+    <div class="cook-actions">
+      <button class="btn btn-ghost" id="cookPrev" type="button">← 上一步</button>
+      <button class="btn btn-accent" id="cookNext" type="button">下一步 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 本地叫法词典 ===== -->
+<div class="overlay" id="dialectOverlay" role="dialog" aria-modal="true" aria-label="慈溪本地叫法">
+  <div class="modal dialect-modal">
+    <div class="modal-head">
+      <div class="modal-head-l">
+        <span class="modal-emoji">📖</span>
+        <div>
+          <h2 class="modal-title">慈溪本地叫法</h2>
+          <p class="modal-sub">望潮、弹涂、倭豆、夜开花、咸齑——本地人张口就来的名字，外地人常常听不明白</p>
+        </div>
+      </div>
+      <button class="modal-close" id="dialectClose" aria-label="关闭">✕</button>
+    </div>
+
+    <div class="ing-search">
+      <input type="search" id="dialectInput" placeholder="搜本地叫法或普通话名，如「望潮」「雪菜」…" autocomplete="off">
+    </div>
+    <div class="ing-kws" id="dialectPills"></div>
+    <div class="dialect-list" id="dialectList"></div>
   </div>
 </div>
 
@@ -1275,6 +1529,8 @@ sup a:hover { text-decoration: underline; }
 <script src="assets/season.js"></script>
 <script src="assets/town.js"></script>
 <script src="assets/month.js"></script>
+<script src="assets/dialect.js"></script>
+<script src="assets/prep.js"></script>
 <script src="assets/remote.js"></script>
 <script src="assets/order.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>

@@ -80,6 +80,30 @@
     return 0;
   }
 
+  // 搜索用文本：菜名、描述、标签、食材、小贴士，再加上本地叫法与标准名的互认写法。
+  // 于是搜「倭豆」能找到蚕豆菜，搜「弹涂」能找到弹涂鱼，搜「咸齑」能找到雪菜。
+  function hayOf(r) {
+    if (r.__hay) return r.__hay;
+    var s = r.name + " " + r.desc + " " + r.tags.join(" ") + " " +
+      r.ingredients.join(" ") + " " + (r.tips || "");
+    if (typeof DIALECT !== "undefined") {
+      var low = s.toLowerCase();
+      for (var i = 0; i < DIALECT.length; i++) {
+        var e = DIALECT[i];
+        if (e.g === "饮食说法") continue;
+        var forms = [e.t].concat(e.a || []);
+        if (e.s) forms.push(e.s);
+        var hit = false;
+        for (var j = 0; j < forms.length; j++) {
+          if (forms[j] && low.indexOf(forms[j].toLowerCase()) >= 0) { hit = true; break; }
+        }
+        if (hit) s += " " + forms.join(" ");
+      }
+    }
+    r.__hay = s.toLowerCase();
+    return r.__hay;
+  }
+
   function matches(r) {
     if (state.cat !== "all" && r.cat !== state.cat) return false;
     if (state.remote && !isRemote(r.id)) return false;
@@ -88,9 +112,7 @@
     if (state.town !== "all" && townOf(r.name) !== state.town) return false;
     var kw = state.kw.trim().toLowerCase();
     if (!kw) return true;
-    var hay = (r.name + " " + r.desc + " " + r.tags.join(" ") + " " +
-      r.ingredients.join(" ") + " " + (r.tips || "")).toLowerCase();
-    return hay.indexOf(kw) >= 0;
+    return hayOf(r).indexOf(kw) >= 0;
   }
 
   function filtered() {
@@ -304,6 +326,9 @@
     });
   }
 
+  // 购物清单的两种看法：按采购分区（一站一站买），或按处理方式（回家先泡哪个）
+  var shopView = "food";
+
   function renderShopList() {
     var ids = CX.shop ? CX.shop.get() : [];
     var countEl = document.getElementById("shopCount");
@@ -312,28 +337,34 @@
     var emptyEl = document.getElementById("shopEmpty");
     var subEl = document.getElementById("shopSub");
     if (!listEl) return;
-    var groups = CX.shop ? CX.shop.aggregate(byIdMap()) : [];
+    var byId = byIdMap();
+    var prep = shopView === "prep";
+    var groups = CX.shop ? (prep ? CX.shop.aggregatePrep(byId) : CX.shop.aggregate(byId)) : [];
     var total = 0;
     groups.forEach(function (g) { total += g.items.length; });
     if (total) {
       listEl.innerHTML = groups.map(function (g) {
         var rows = g.items.map(function (it) {
           var cnt = it.count > 1 ? '<span class="sl-count">×' + it.count + "</span>" : "";
-          return "<li><span>" + it.text + "</span>" + cnt + "</li>";
+          var tip = it.tip ? '<span class="sl-tip">' + it.tip + "</span>" : "";
+          return '<li><span class="sl-text">' + it.text + "</span>" + tip + cnt + "</li>";
         }).join("");
         var cls = "shop-group" + (g.tag === "seasoning" ? " is-seasoning" : g.tag === "other" ? " is-other" : "");
         return '<div class="' + cls + '">' +
-          '<div class="shop-group-title">' + g.label + " <span>" + g.items.length + " 项</span></div>" +
+          '<div class="shop-group-title">' + g.label + " <span>" + g.items.length + " 项</span>" +
+          (g.hint ? '<em class="shop-group-hint">' + g.hint + "</em>" : "") + "</div>" +
           '<ul class="shop-items">' + rows + "</ul></div>";
       }).join("");
       listEl.style.display = "block";
       if (emptyEl) emptyEl.style.display = "none";
-      if (subEl) subEl.textContent = ids.length + " 道菜 · 共 " + total + " 项";
+      if (subEl) {
+        subEl.textContent = ids.length + " 道菜 · 共 " + total + " 项 · " + (prep ? "按处理方式" : "按采购分区");
+      }
     } else {
       listEl.innerHTML = "";
       listEl.style.display = "none";
       if (emptyEl) emptyEl.style.display = "block";
-      if (subEl) subEl.textContent = "已加入菜谱的食材汇总";
+      if (subEl) subEl.textContent = "已加入菜谱的食材汇总，也可以切到「本周菜单」排一周的菜";
     }
   }
 
@@ -383,6 +414,7 @@
     renderCurNutrition();
     updateFavBtn();
     updateServePills();
+    renderPrep();
 
     // Schema.org 结构化数据（Recipe）
     if (CX.seo && CX.seo.recipe) CX.seo.recipe(r, cat.name);
@@ -453,6 +485,377 @@
     document.getElementById("overlay").classList.remove("open");
     document.body.classList.remove("lock");
     try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+  }
+
+  function renderPrep() {
+    var box = document.getElementById("prepSection");
+    if (!box) return;
+    if (!curRecipe || !CX.prep || !CX.prep.groups) { box.hidden = true; return; }
+    var res = CX.prep.groups(curRecipe.ingredients) || { groups: [], lead: 0 };
+    var groups = res.groups || [];
+    if (!groups.length) { box.hidden = true; return; }
+    var lead = document.getElementById("prepLead");
+    if (lead) {
+      lead.innerHTML = res.lead
+        ? "有食材要提前动手，最久的是 <b>" + res.lead + " 分钟</b>。进门先把它泡上或养上，再回头切配，等的时间正好用。"
+        : "食材洗净、切配、打散即可，按下面的顺序来。";
+    }
+    var wrap = document.getElementById("prepGroups");
+    if (wrap) {
+      wrap.innerHTML = groups.map(function (g) {
+        var items = g.items.map(function (it) {
+          return '<li><span class="prep-name">' + it.name + "</span>" +
+            (it.tip ? '<span class="prep-tip">' + it.tip + "</span>" : "") + "</li>";
+        }).join("");
+        return '<div class="prep-group' + (g.g === "洗净备好" ? " is-plain" : "") + '">' +
+          '<div class="prep-group-title">' + g.g +
+          (g.hint ? "<span>" + g.hint + "</span>" : "") + "</div>" +
+          '<ul class="prep-items">' + items + "</ul></div>";
+      }).join("");
+    }
+    box.hidden = false;
+  }
+
+  /* ===== 做菜模式 ===== */
+  var cookState = { steps: [], idx: 0, done: {}, timer: null, remain: 0, wake: null };
+  var beepCtx = null;
+
+  // 从步骤文字里读时长：「小火焖 20 分钟」「焯 30 秒」「炖 1 小时」
+  function parseDuration(text) {
+    var m = String(text || "").match(/(\d+(?:\.\d+)?)\s*(小时|钟头|分钟|分|秒钟|秒)/);
+    if (!m) return 0;
+    var n = parseFloat(m[1]);
+    if (m[2] === "小时" || m[2] === "钟头") return Math.round(n * 3600);
+    if (m[2] === "分钟" || m[2] === "分") return Math.round(n * 60);
+    return Math.round(n);
+  }
+
+  function fmtTime(sec) {
+    sec = Math.max(0, Math.round(sec));
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function beep(times) {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!beepCtx) beepCtx = new AC();
+      if (beepCtx.state === "suspended" && beepCtx.resume) beepCtx.resume();
+      var t0 = beepCtx.currentTime, n = times || 3;
+      for (var i = 0; i < n; i++) {
+        var o = beepCtx.createOscillator(), g = beepCtx.createGain();
+        o.type = "sine";
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t0 + i * 0.45);
+        g.gain.exponentialRampToValueAtTime(0.22, t0 + i * 0.45 + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.45 + 0.32);
+        o.connect(g);
+        g.connect(beepCtx.destination);
+        o.start(t0 + i * 0.45);
+        o.stop(t0 + i * 0.45 + 0.35);
+      }
+    } catch (e) { /* 不支持音频就静默 */ }
+  }
+
+  function keepAwake(on) {
+    if (!navigator.wakeLock) return;
+    if (on) {
+      navigator.wakeLock.request("screen").then(function (l) { cookState.wake = l; }, function () {});
+    } else if (cookState.wake) {
+      try { cookState.wake.release(); } catch (e) {}
+      cookState.wake = null;
+    }
+  }
+
+  function stopCookTimer() {
+    if (cookState.timer) { clearInterval(cookState.timer); cookState.timer = null; }
+    var btn = document.getElementById("cookTimer");
+    if (btn) {
+      btn.classList.remove("running");
+      var sec = parseDuration(cookState.steps[cookState.idx] || "");
+      if (sec > 0) btn.textContent = "⏱ 计时 " + fmtTime(sec);
+    }
+  }
+
+  function startCookTimer(sec) {
+    stopCookTimer();
+    cookState.remain = sec;
+    var btn = document.getElementById("cookTimer");
+    if (btn) btn.classList.add("running");
+    var tick = function () {
+      var b = document.getElementById("cookTimer");
+      if (cookState.remain <= 0) {
+        if (b) b.textContent = "⏱ 时间到";
+        stopCookTimer();
+        beep(4);
+        return;
+      }
+      if (b) b.textContent = "⏱ " + fmtTime(cookState.remain) + "（点一下停）";
+      cookState.remain -= 1;
+    };
+    tick();
+    cookState.timer = setInterval(tick, 1000);
+  }
+
+  function renderCook() {
+    var total = cookState.steps.length;
+    if (!total) return;
+    var i = cookState.idx;
+    var no = document.getElementById("cookStepNo");
+    if (no) no.textContent = "第 " + (i + 1) + " / " + total + " 步";
+    var bar = document.getElementById("cookProgress");
+    if (bar) bar.style.width = Math.round(((i + 1) / total) * 100) + "%";
+    var text = cookState.steps[i];
+    var stepEl = document.getElementById("cookText");
+    if (stepEl) {
+      stepEl.textContent = text;
+      stepEl.classList.toggle("done", !!cookState.done[i]);
+    }
+    var sec = parseDuration(text);
+    var timerBtn = document.getElementById("cookTimer");
+    if (timerBtn) {
+      timerBtn.hidden = sec <= 0;
+      if (sec > 0) timerBtn.textContent = "⏱ 计时 " + fmtTime(sec);
+    }
+    var prev = document.getElementById("cookPrev");
+    if (prev) prev.disabled = i === 0;
+    var next = document.getElementById("cookNext");
+    if (next) next.textContent = i === total - 1 ? "做完了 ✓" : "下一步 →";
+    var dots = document.getElementById("cookDots");
+    if (dots) {
+      dots.innerHTML = cookState.steps.map(function (_, k) {
+        return '<button type="button" class="cook-dot' + (k === i ? " on" : "") +
+          (cookState.done[k] ? " done" : "") + '" data-k="' + k + '" aria-label="第 ' + (k + 1) + ' 步"></button>';
+      }).join("");
+      dots.querySelectorAll(".cook-dot").forEach(function (b) {
+        b.addEventListener("click", function () {
+          stopCookTimer();
+          cookState.idx = parseInt(b.dataset.k, 10);
+          renderCook();
+        });
+      });
+    }
+  }
+
+  function openCook() {
+    if (!curRecipe) return;
+    var ov = document.getElementById("cookOverlay");
+    if (!ov) return;
+    var variants = curRecipe.variants || [];
+    var tab = document.querySelector("#variantTabs .variant-tab.active");
+    var vi = tab ? parseInt(tab.dataset.v, 10) : 0;
+    cookState.steps = (vi > 0 && variants[vi - 1] ? variants[vi - 1].steps : curRecipe.steps || []).slice();
+    if (!cookState.steps.length) return;
+    cookState.idx = 0;
+    cookState.done = {};
+    var nameEl = document.getElementById("cookName");
+    if (nameEl) nameEl.textContent = curRecipe.name;
+    var vEl = document.getElementById("cookVariant");
+    if (vEl) vEl.textContent = tab ? tab.textContent : "";
+    if (beepCtx && beepCtx.state === "suspended" && beepCtx.resume) beepCtx.resume();
+    ov.classList.add("open");
+    document.body.classList.add("lock");
+    renderCook();
+    keepAwake(true);
+  }
+
+  function closeCook() {
+    stopCookTimer();
+    keepAwake(false);
+    var ov = document.getElementById("cookOverlay");
+    if (ov) ov.classList.remove("open");
+    if (!document.getElementById("overlay").classList.contains("open")) {
+      document.body.classList.remove("lock");
+    }
+  }
+
+  function cookGo(d) {
+    var total = cookState.steps.length;
+    var n = cookState.idx + d;
+    if (n < 0) return;
+    if (n >= total) {
+      for (var k = 0; k < total; k++) cookState.done[k] = true;
+      stopCookTimer();
+      renderCook();
+      keepAwake(false);
+      var next = document.getElementById("cookNext");
+      if (next) next.textContent = "全部完成 ✓";
+      return;
+    }
+    if (d > 0) cookState.done[cookState.idx] = true;
+    stopCookTimer();
+    cookState.idx = n;
+    renderCook();
+  }
+
+  /* ===== 本地叫法词典 ===== */
+  var dialectGroup = "all";
+  var dialectQuery = "";
+
+  function dialectDishCount(term) {
+    if (!term) return 0;
+    var q = term.toLowerCase();
+    return RECIPES.filter(function (r) { return hayOf(r).indexOf(q) >= 0; }).length;
+  }
+
+  function renderDialectPills() {
+    var wrap = document.getElementById("dialectPills");
+    if (!wrap || typeof DIALECT === "undefined") return;
+    var counts = {};
+    DIALECT.forEach(function (e) { counts[e.g] = (counts[e.g] || 0) + 1; });
+    var html = '<button class="pill' + (dialectGroup === "all" ? " active" : "") +
+      '" data-dg="all">全部<span>' + DIALECT.length + "</span></button>";
+    DIALECT_GROUP_ORDER.forEach(function (g) {
+      if (!counts[g]) return;
+      html += '<button class="pill' + (dialectGroup === g ? " active" : "") +
+        '" data-dg="' + g + '">' + g + "<span>" + counts[g] + "</span></button>";
+    });
+    wrap.innerHTML = html;
+  }
+
+  function renderDialectList() {
+    var host = document.getElementById("dialectList");
+    if (!host || typeof DIALECT === "undefined") return;
+    var q = dialectQuery.trim().toLowerCase();
+    var list = DIALECT.filter(function (e) {
+      if (dialectGroup !== "all" && e.g !== dialectGroup) return false;
+      if (!q) return true;
+      var hay = (e.t + " " + e.s + " " + (e.a || []).join(" ") + " " + e.n + " " + e.sc).toLowerCase();
+      return hay.indexOf(q) >= 0;
+    });
+    if (!list.length) {
+      host.innerHTML = '<div class="ing-empty">没找到这个说法，换个词试试。</div>';
+      return;
+    }
+    host.innerHTML = list.map(function (e) {
+      var n = dialectDishCount(e.t);
+      var alt = (e.a && e.a.length) ? '<span class="dl-alt">也作 ' + e.a.join("、") + "</span>" : "";
+      return '<article class="dl-card">' +
+        '<div class="dl-head"><b>' + e.t + "</b>" +
+        '<span class="dl-std">' + e.s + "</span>" +
+        '<span class="dl-sc">' + e.sc + "</span></div>" +
+        alt +
+        '<p class="dl-note">' + e.n + "</p>" +
+        '<div class="dl-foot">' +
+        (n ? '<button type="button" class="dl-go" data-q="' + e.t + '">看用得上它的 ' + n + " 道菜 →</button>"
+           : '<span class="dl-none">菜谱里暂时还没有它</span>') +
+        (e.u ? '<a href="' + e.u + '" target="_blank" rel="noopener">' + e.st + "</a>" : "") +
+        "</div></article>";
+    }).join("");
+    host.querySelectorAll(".dl-go").forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.kw = b.dataset.q;
+        var search = document.getElementById("searchInput");
+        if (search) search.value = b.dataset.q;
+        var ov = document.getElementById("dialectOverlay");
+        if (ov) ov.classList.remove("open");
+        if (!document.getElementById("overlay").classList.contains("open")) {
+          document.body.classList.remove("lock");
+        }
+        renderGrid();
+        var sec = document.getElementById("recipes");
+        if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }
+
+  /* ===== 本周菜单 ===== */
+  var weekPickDay = "";
+
+  function renderWeek() {
+    var host = document.getElementById("weekDays");
+    if (!host || !CX.week) return;
+    var w = CX.week.get();
+    var byId = byIdMap();
+    host.innerHTML = CX.week.days.map(function (d) {
+      var ids = w[d] || [];
+      var chips = ids.map(function (id) {
+        var r = byId[id];
+        if (!r) return "";
+        return '<span class="week-chip"><b data-open="' + id + '">' + r.name + "</b>" +
+          '<i data-del="' + id + '" data-day="' + d + '" title="移出这天">×</i></span>';
+      }).join("");
+      return '<div class="week-day"><div class="week-day-name">' + d + "</div>" +
+        '<div class="week-day-body">' + (chips || '<span class="week-empty">还没安排</span>') +
+        '<button class="week-add" type="button" data-day="' + d + '">+ 加菜</button></div></div>';
+    }).join("");
+    host.querySelectorAll(".week-chip b[data-open]").forEach(function (b) {
+      b.addEventListener("click", function () { openModal(parseInt(b.dataset.open, 10), RECIPES); });
+    });
+    host.querySelectorAll(".week-chip i[data-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        CX.week.remove(b.dataset.day, parseInt(b.dataset.del, 10));
+        renderWeek();
+      });
+    });
+    host.querySelectorAll(".week-add").forEach(function (b) {
+      b.addEventListener("click", function () { openWeekPicker(b.dataset.day); });
+    });
+    var n = CX.week.ids().length;
+    var sub = document.getElementById("weekSummary");
+    if (sub) sub.textContent = n ? "本周已排 " + n + " 道菜，合并后可一次买齐" : "还没排菜，点下面任一天的「+ 加菜」开始";
+  }
+
+  function openWeekPicker(day) {
+    weekPickDay = day;
+    var picker = document.getElementById("weekPicker");
+    var label = document.getElementById("weekPickLabel");
+    if (label) label.textContent = "往「" + day + "」里加菜";
+    if (picker) picker.hidden = false;
+    var input = document.getElementById("weekSearch");
+    if (input) { input.value = ""; input.focus(); }
+    renderWeekPicker();
+  }
+
+  function renderWeekPicker() {
+    var host = document.getElementById("weekPickerList");
+    if (!host) return;
+    var q = (document.getElementById("weekSearch").value || "").trim().toLowerCase();
+    var list = RECIPES.filter(function (r) { return !q || hayOf(r).indexOf(q) >= 0; }).slice(0, 60);
+    if (!list.length) {
+      host.innerHTML = '<div class="ing-empty">没找到，换个词试试。</div>';
+      return;
+    }
+    host.innerHTML = list.map(function (r) {
+      return '<button type="button" class="wp-item" data-id="' + r.id + '">' +
+        '<span class="ih-emoji">' + r.emoji + "</span>" + r.name +
+        '<span class="ih-cat">' + CATS[r.cat].name + "</span></button>";
+    }).join("");
+    host.querySelectorAll(".wp-item").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!weekPickDay) return;
+        CX.week.add(weekPickDay, parseInt(b.dataset.id, 10));
+        var picker = document.getElementById("weekPicker");
+        if (picker) picker.hidden = true;
+        weekPickDay = "";
+        renderWeek();
+      });
+    });
+  }
+
+  function weekMenuText() {
+    var w = CX.week.get();
+    var byId = byIdMap();
+    var lines = ["慈溪味 · 本周菜单"];
+    var total = 0;
+    CX.week.days.forEach(function (d) {
+      var ids = w[d] || [];
+      if (!ids.length) return;
+      var names = ids.map(function (id) {
+        var r = byId[id];
+        if (!r) return "";
+        total++;
+        return r.name + "（" + r.time + "）";
+      }).filter(Boolean);
+      lines.push("");
+      lines.push("【" + d + "】");
+      names.forEach(function (n) { lines.push("· " + n); });
+    });
+    if (!total) return "";
+    lines.push("");
+    lines.push("共 " + total + " 道 · 出自「慈溪味 · 慈溪菜菜谱大全」");
+    return lines.join("\n");
   }
 
   function randomPick() {
@@ -529,6 +932,11 @@
     document.getElementById("closeModal").addEventListener("click", closeModal);
 
     document.addEventListener("keydown", function (e) {
+      // 做菜模式 / 叫法词典打开时，方向键与 Esc 交给上面那一层处理
+      var topCook = document.getElementById("cookOverlay");
+      if (topCook && topCook.classList.contains("open")) return;
+      var topDia = document.getElementById("dialectOverlay");
+      if (topDia && topDia.classList.contains("open")) return;
       if (e.key === "Escape") closeModal();
       if (e.key === "ArrowLeft") {
         var p = document.getElementById("prevBtn");
@@ -620,22 +1028,91 @@
       });
     }
 
-    // 有什么吃什么（按食材找菜）
+    // 有什么吃什么（多食材反查：说出家里有的，列出能做的，并标出差哪几样）
     var ingOverlay = document.getElementById("ingOverlay");
     var ingInput = document.getElementById("ingInput");
     var ingKeywords = document.getElementById("ingKeywords");
     var ingResult = document.getElementById("ingResult");
+    var ingTokensEl = document.getElementById("ingTokens");
+    var ingReady = document.getElementById("ingReady");
+    var pantryTokens = [];
+    var pantryReadyOnly = false;
+
+    function pantryMerge(list) {
+      list.forEach(function (t) {
+        t = String(t || "").trim();
+        if (t && pantryTokens.indexOf(t) < 0) pantryTokens.push(t);
+      });
+    }
+    function renderPantryTokens() {
+      if (!ingTokensEl) return;
+      if (!pantryTokens.length) {
+        ingTokensEl.innerHTML = '<span class="ing-tokens-hint">还没选食材，输入或用下面的常用食材</span>';
+        return;
+      }
+      ingTokensEl.innerHTML = pantryTokens.map(function (t) {
+        return '<span class="ing-token">' + t + '<i data-t="' + t + '" title="去掉">×</i></span>';
+      }).join("") + '<button type="button" class="ing-token-clear" id="ingTokenClear">清空</button>';
+      ingTokensEl.querySelectorAll("i[data-t]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var i = pantryTokens.indexOf(b.dataset.t);
+          if (i >= 0) pantryTokens.splice(i, 1);
+          renderPantryTokens();
+          renderIngResult();
+        });
+      });
+      var c = document.getElementById("ingTokenClear");
+      if (c) {
+        c.addEventListener("click", function () {
+          pantryTokens = [];
+          renderPantryTokens();
+          renderIngResult();
+        });
+      }
+    }
+    function pantryTokensNow() {
+      var typed = (CX.pantry && CX.pantry.split) ? CX.pantry.split(ingInput.value) : [];
+      var all = pantryTokens.concat(typed), out = [];
+      all.forEach(function (t) { if (t && out.indexOf(t) < 0) out.push(t); });
+      return out;
+    }
     if (ingOverlay) {
       document.getElementById("ingOpen").addEventListener("click", function () {
         ingOverlay.classList.add("open");
         document.body.classList.add("lock");
         renderIngKeywords();
-        renderIngResult(ingInput.value);
+        renderPantryTokens();
+        renderIngResult();
         setTimeout(function () { ingInput.focus(); }, 60);
       });
       document.getElementById("ingClose").addEventListener("click", closeIng);
       ingOverlay.addEventListener("click", function (e) { if (e.target === this) closeIng(); });
-      ingInput.addEventListener("input", function () { renderIngResult(ingInput.value); });
+      // 敲到空格、顿号、逗号就当成一个食材收下，继续输下一个
+      ingInput.addEventListener("input", function () {
+        if (/[\s、，,+＋\/／;；]$/.test(ingInput.value)) {
+          pantryMerge(CX.pantry.split(ingInput.value));
+          ingInput.value = "";
+          renderPantryTokens();
+        }
+        renderIngResult();
+      });
+      ingInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          pantryMerge(CX.pantry.split(ingInput.value));
+          ingInput.value = "";
+          renderPantryTokens();
+          renderIngResult();
+        }
+      });
+      if (ingReady) {
+        ingReady.addEventListener("click", function () {
+          pantryReadyOnly = !pantryReadyOnly;
+          ingReady.classList.toggle("active", pantryReadyOnly);
+          ingReady.setAttribute("aria-pressed", pantryReadyOnly ? "true" : "false");
+          renderIngResult();
+        });
+      }
     }
     function closeIng() {
       ingOverlay.classList.remove("open");
@@ -651,36 +1128,45 @@
           if (text.indexOf(k) >= 0) scores[k] = (scores[k] || 0) + 1;
         });
       });
-      var popular = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; }).slice(0, 24);
+      var popular = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; }).slice(0, 30);
       ingKeywords.innerHTML = popular.map(function (k) {
         return '<button type="button" class="ing-kw">' + k + "</button>";
       }).join("");
       ingKeywords.querySelectorAll(".ing-kw").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          ingInput.value = btn.textContent;
-          renderIngResult(ingInput.value);
+          pantryMerge([btn.textContent]);
+          renderPantryTokens();
+          renderIngResult();
         });
       });
     }
-    function renderIngResult(q) {
+    function renderIngResult() {
       if (!ingResult) return;
-      q = (q || "").trim();
-      var hits = CX.ing && CX.ing.find ? CX.ing.find(RECIPES, q) : [];
-      if (!q) {
-        ingResult.innerHTML = '<div class="ing-empty">输入或点选上面的食材，看看能做什么菜。</div>';
+      var tokens = pantryTokensNow();
+      if (!tokens.length) {
+        ingResult.innerHTML = '<div class="ing-empty">把家里现有的食材写进来，看看能凑出什么菜。多个食材用空格隔开，比如「蛎黄 年糕 雪菜」。</div>';
         return;
       }
+      var hits = (CX.pantry && CX.pantry.find) ? CX.pantry.find(RECIPES, tokens) : [];
+      var readyN = hits.filter(function (h) { return !h.miss.length; }).length;
+      if (pantryReadyOnly) hits = hits.filter(function (h) { return !h.miss.length; });
       if (!hits.length) {
-        ingResult.innerHTML = '<div class="ing-empty">没找到用「' + q + '」的菜，换个食材试试？</div>';
+        ingResult.innerHTML = '<div class="ing-empty">用「' + tokens.join("、") + '」还凑不出菜，' +
+          (pantryReadyOnly ? "关掉「只看能做的」再挑挑看。" : "减少一两样或换个食材试试。") + "</div>";
         return;
       }
-      ingResult.innerHTML = hits.map(function (r) {
-        var cat = CATS[r.cat];
-        return '<button type="button" class="ing-hit" data-id="' + r.id + '">' +
+      var head = '<div class="ing-stat">用「' + tokens.join("、") + '」能碰到 ' + hits.length + " 道" +
+        (readyN ? "，其中 <b>" + readyN + "</b> 道现在就能做" : "") + "</div>";
+      var shown = hits.slice(0, 80);
+      ingResult.innerHTML = head + shown.map(function (h) {
+        var r = h.r;
+        var line = h.miss.length
+          ? '<span class="ih-miss">还差 ' + h.miss.join("、") + "</span>"
+          : '<span class="ih-ready">主料齐了</span>';
+        return '<button type="button" class="ing-hit' + (h.miss.length ? "" : " is-ready") + '" data-id="' + r.id + '">' +
           '<span class="ih-emoji">' + r.emoji + "</span>" +
-          '<span class="ih-name">' + r.name + "</span>" +
-          '<span class="ih-cat">' + cat.name + "</span>" +
-          "</button>";
+          '<span class="ih-body"><span class="ih-name">' + r.name + "</span>" + line + "</span>" +
+          '<span class="ih-score">有 ' + h.have.length + "/" + h.total + "</span></button>";
       }).join("");
       ingResult.querySelectorAll(".ing-hit").forEach(function (btn) {
         btn.addEventListener("click", function () {
@@ -690,47 +1176,112 @@
       });
     }
 
-    // 购物清单
+    // 购物清单 / 本周菜单
     var shopOverlay = document.getElementById("shopOverlay");
+    var shopTab = "list";
+    function switchShopTab(tab) {
+      shopTab = tab;
+      var isList = tab === "list";
+      var paneList = document.getElementById("shopPaneList");
+      var paneWeek = document.getElementById("shopPaneWeek");
+      var actsList = document.getElementById("shopActionsList");
+      var actsWeek = document.getElementById("shopActionsWeek");
+      var tabList = document.getElementById("shopTabList");
+      var tabWeek = document.getElementById("shopTabWeek");
+      if (paneList) paneList.hidden = !isList;
+      if (paneWeek) paneWeek.hidden = isList;
+      if (actsList) actsList.hidden = !isList;
+      if (actsWeek) actsWeek.hidden = isList;
+      if (tabList) tabList.classList.toggle("active", isList);
+      if (tabWeek) tabWeek.classList.toggle("active", !isList);
+      if (isList) renderShopList(); else renderWeek();
+    }
     if (shopOverlay) {
       document.getElementById("shopOpen").addEventListener("click", function () {
         renderShopList();
+        renderWeek();
         shopOverlay.classList.add("open");
         document.body.classList.add("lock");
       });
       document.getElementById("shopClose").addEventListener("click", closeShop);
       shopOverlay.addEventListener("click", function (e) { if (e.target === this) closeShop(); });
+      document.getElementById("shopTabList").addEventListener("click", function () { switchShopTab("list"); });
+      document.getElementById("shopTabWeek").addEventListener("click", function () { switchShopTab("week"); });
       document.getElementById("shopClear").addEventListener("click", function () {
         if (CX.shop) CX.shop.clear();
         renderShopList();
       });
       document.getElementById("shopCopy").addEventListener("click", copyShopList);
+      var shopViewBtn = document.getElementById("shopView");
+      if (shopViewBtn) {
+        shopViewBtn.addEventListener("click", function () {
+          shopView = shopView === "prep" ? "food" : "prep";
+          shopViewBtn.textContent = shopView === "prep" ? "🧾 按采购分区" : "🥢 按处理方式";
+          renderShopList();
+        });
+      }
+      var weekSearch = document.getElementById("weekSearch");
+      if (weekSearch) weekSearch.addEventListener("input", renderWeekPicker);
+      var weekClearBtn = document.getElementById("weekClear");
+      if (weekClearBtn) {
+        weekClearBtn.addEventListener("click", function () {
+          if (CX.week) CX.week.clear();
+          renderWeek();
+        });
+      }
+      var weekMergeBtn = document.getElementById("weekMerge");
+      if (weekMergeBtn) {
+        weekMergeBtn.addEventListener("click", function () {
+          var ids = CX.week ? CX.week.ids() : [];
+          if (!ids.length) return;
+          CX.shop.addMany(ids);
+          switchShopTab("list");
+          weekMergeBtn.textContent = "✅ 已并入清单";
+          setTimeout(function () { weekMergeBtn.textContent = "🧺 合并成采购单"; }, 1400);
+        });
+      }
+      var weekCopyBtn = document.getElementById("weekCopy");
+      if (weekCopyBtn) {
+        weekCopyBtn.addEventListener("click", function () {
+          var text = weekMenuText();
+          if (!text) return;
+          copyText(text, weekCopyBtn, "📋 复制菜单");
+        });
+      }
     }
     function closeShop() {
       shopOverlay.classList.remove("open");
       document.body.classList.remove("lock");
     }
-    function copyShopList() {
-      var groups = CX.shop ? CX.shop.aggregate(byIdMap()) : [];
-      var total = 0;
-      groups.forEach(function (g) { total += g.items.length; });
-      if (!total) return;
-      var text = groups.map(function (g) {
-        var lines = ["【" + g.label + "】"];
-        g.items.forEach(function (it) {
-          lines.push("□ " + it.text + (it.count > 1 ? " ×" + it.count : ""));
-        });
-        return lines.join("\n");
-      }).join("\n\n");
+    function copyText(text, btn, restore) {
       var done = function () {
-        var btn = document.getElementById("shopCopy");
-        if (btn) { btn.textContent = "✅ 已复制"; setTimeout(function () { btn.textContent = "📋 复制清单"; }, 1200); }
+        if (btn) {
+          btn.textContent = "✅ 已复制";
+          setTimeout(function () { btn.textContent = restore; }, 1200);
+        }
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
       } else {
         fallbackCopy(text, done);
       }
+    }
+    function copyShopList() {
+      var byId = byIdMap();
+      var prep = shopView === "prep";
+      var groups = CX.shop ? (prep ? CX.shop.aggregatePrep(byId) : CX.shop.aggregate(byId)) : [];
+      var total = 0;
+      groups.forEach(function (g) { total += g.items.length; });
+      if (!total) return;
+      var text = groups.map(function (g) {
+        var lines = ["【" + g.label + "】" + (prep && g.hint ? "（" + g.hint + "）" : "")];
+        g.items.forEach(function (it) {
+          lines.push("□ " + it.text + (it.count > 1 ? " ×" + it.count : "") +
+            (prep && it.tip ? "  —— " + it.tip : ""));
+        });
+        return lines.join("\n");
+      }).join("\n\n");
+      copyText("慈溪味 · 采购清单\n\n" + text, document.getElementById("shopCopy"), "📋 复制清单");
     }
     function fallbackCopy(text, done) {
       var ta = document.createElement("textarea");
@@ -743,10 +1294,78 @@
       document.body.removeChild(ta);
     }
 
+    // ===== 做菜模式 =====
+    var cookOverlay = document.getElementById("cookOverlay");
+    var mCook = document.getElementById("mCook");
+    if (mCook) mCook.addEventListener("click", openCook);
+    if (cookOverlay) {
+      document.getElementById("cookClose").addEventListener("click", closeCook);
+      document.getElementById("cookPrev").addEventListener("click", function () { cookGo(-1); });
+      document.getElementById("cookNext").addEventListener("click", function () { cookGo(1); });
+      var cookText = document.getElementById("cookText");
+      if (cookText) {
+        cookText.addEventListener("click", function () {
+          var i = cookState.idx;
+          cookState.done[i] = !cookState.done[i];
+          renderCook();
+        });
+      }
+      var cookTimerBtn = document.getElementById("cookTimer");
+      if (cookTimerBtn) {
+        cookTimerBtn.addEventListener("click", function () {
+          var sec = parseDuration(cookState.steps[cookState.idx] || "");
+          if (!sec) return;
+          if (cookState.timer) { stopCookTimer(); return; }
+          startCookTimer(sec);
+        });
+      }
+      document.addEventListener("keydown", function (e) {
+        if (!cookOverlay.classList.contains("open")) return;
+        if (e.key === "ArrowRight") cookGo(1);
+        else if (e.key === "ArrowLeft") cookGo(-1);
+      });
+    }
+
+    // ===== 本地叫法词典 =====
+    var dialectOverlay = document.getElementById("dialectOverlay");
+    function closeDialect() {
+      dialectOverlay.classList.remove("open");
+      document.body.classList.remove("lock");
+    }
+    if (dialectOverlay) {
+      document.getElementById("dialectOpen").addEventListener("click", function () {
+        renderDialectPills();
+        renderDialectList();
+        dialectOverlay.classList.add("open");
+        document.body.classList.add("lock");
+      });
+      document.getElementById("dialectClose").addEventListener("click", closeDialect);
+      dialectOverlay.addEventListener("click", function (e) { if (e.target === this) closeDialect(); });
+      var dPills = document.getElementById("dialectPills");
+      if (dPills) {
+        dPills.addEventListener("click", function (e) {
+          var b = e.target.closest(".pill");
+          if (!b) return;
+          dialectGroup = b.dataset.dg;
+          renderDialectPills();
+          renderDialectList();
+        });
+      }
+      var dInput = document.getElementById("dialectInput");
+      if (dInput) {
+        dInput.addEventListener("input", function () {
+          dialectQuery = dInput.value;
+          renderDialectList();
+        });
+      }
+    }
+
     document.addEventListener("keydown", function (e) {
       if (e.key !== "Escape") return;
       if (ingOverlay && ingOverlay.classList.contains("open")) closeIng();
       else if (shopOverlay && shopOverlay.classList.contains("open")) closeShop();
+      else if (cookOverlay && cookOverlay.classList.contains("open")) closeCook();
+      else if (dialectOverlay && dialectOverlay.classList.contains("open")) closeDialect();
     });
 
     // ===== 一键点菜 =====

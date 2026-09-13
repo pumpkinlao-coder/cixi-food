@@ -1,5 +1,5 @@
 /* 慈溪味 Service Worker — 缓存优先，支持离线访问 */
-var CACHE_NAME = "cixi-cache-v8";
+var CACHE_NAME = "cixi-cache-v9";
 
 var CORE_ASSETS = [
   "./",
@@ -32,6 +32,8 @@ var CORE_ASSETS = [
   "./assets/season.js",
   "./assets/town.js",
   "./assets/month.js",
+  "./assets/dialect.js",
+  "./assets/prep.js",
   "./assets/logo.svg",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
