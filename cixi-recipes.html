@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>慈溪味 · 慈溪菜菜谱大全</title>
-<meta name="description" content="慈溪菜菜谱查询网站：484道慈溪与甬帮菜做法，涵盖海鲜河鲜、肉类时蔬、腌糟醉鲜、汤羹炖品、主食点心与甜品饮品，附完整材料与步骤。">
+<meta name="description" content="慈溪菜菜谱查询网站：521道慈溪与甬帮菜做法，涵盖海鲜河鲜、肉类时蔬、腌糟醉鲜、汤羹炖品、主食点心与甜品饮品，附完整材料与步骤。">
 <meta name="theme-color" content="#a8462e">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
@@ -166,6 +166,14 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
   box-shadow: 0 6px 20px var(--shadow);
 }
 .filter-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.filter-row-sub { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px dashed var(--rule); }
+.filter-label {
+  flex: 0 0 auto; font-size: 0.82rem; letter-spacing: 0.08em;
+  color: var(--muted); font-weight: 600; padding-right: 0.25rem;
+}
+.pill-season, .pill-town { font-size: 0.84rem; padding: 0.34rem 0.8rem; }
+.pill-season.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pill-town.active { background: var(--ink); border-color: var(--ink); color: #fff; }
 .pill {
   display: inline-flex; align-items: center; gap: 0.4rem;
   border: 1px solid var(--rule); background: var(--bg2); color: var(--ink);
@@ -259,6 +267,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 }
 .chip-cat { color: var(--cat); background: color-mix(in srgb, var(--cat) 12%, var(--bg2)); border: 1px solid color-mix(in srgb, var(--cat) 30%, transparent); }
 .chip-fame { color: #fff; background: linear-gradient(135deg, #c25f3a, var(--accent)); }
+.chip-season { color: #7a4a12; background: rgba(214,158,46,0.16); border: 1px solid rgba(214,158,46,0.42); }
+.chip-town { color: #2f5d4a; background: rgba(47,93,74,0.12); border: 1px solid rgba(47,93,74,0.34); }
 .chip-remote {
   margin-left: auto; color: var(--accent2); font-weight: 600;
   background: rgba(95,127,85,0.1); border: 1px solid rgba(95,127,85,0.35);
@@ -437,6 +447,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 .modal-cat { font-size: 0.82rem; color: var(--muted); margin-top: 0.25rem; letter-spacing: 0.06em; }
 .modal-tags { display: flex; gap: 0.4rem; margin-top: 0.6rem; flex-wrap: wrap; }
 .tag { font-size: 0.74rem; padding: 0.14rem 0.6rem; border-radius: 999px; background: rgba(168,70,46,0.1); color: var(--accent); border: 1px solid rgba(168,70,46,0.25); }
+.tag-season { background: rgba(214,158,46,0.16); color: #7a4a12; border-color: rgba(214,158,46,0.42); }
+.tag-town { background: rgba(47,93,74,0.12); color: #2f5d4a; border-color: rgba(47,93,74,0.34); }
 .modal-desc { margin: 1.3rem 0 0.4rem; color: var(--muted); font-size: 0.98rem; border-left: 3px solid var(--gold); padding-left: 0.9rem; }
 .remote-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
@@ -780,7 +792,7 @@ sup a:hover { text-decoration: underline; }
 <div class="hero" id="top">
   <div class="hero-inner">
     <div class="hero-search-wrap">
-      <div class="hero-count" title="共收录 484 道菜谱"><b id="statTotal">484</b></div>
+      <div class="hero-count" title="共收录 521 道菜谱"><b id="statTotal">521</b></div>
       <div class="hero-search" role="search">
         <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5 L17.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <input type="search" id="searchInput" placeholder="搜菜名或食材，如「黄鱼」「年糕」「杨梅」…" aria-label="搜索菜谱">
@@ -810,6 +822,14 @@ sup a:hover { text-decoration: underline; }
             <option value="time">用时从短到长</option>
           </select>
         </div>
+      </div>
+      <div class="filter-row filter-row-sub">
+        <span class="filter-label">时令</span>
+        <div id="seasonPills" style="display:contents"></div>
+      </div>
+      <div class="filter-row filter-row-sub">
+        <span class="filter-label">乡镇</span>
+        <div id="townPills" style="display:contents"></div>
       </div>
     </div>
 
@@ -947,7 +967,7 @@ sup a:hover { text-decoration: underline; }
     </div>
 
     <div class="about-stats">
-      <div class="about-stat"><b>484</b><span>道慈溪与甬帮菜</span></div>
+      <div class="about-stat"><b>521</b><span>道慈溪与甬帮菜</span></div>
       <div class="about-stat"><b>8</b><span>大食材与做法分类</span></div>
       <div class="about-stat"><b>100%</b><span>附材料与分步做法</span></div>
       <div class="about-stat"><b>0</b><span>外网依赖 · 纯静态</span></div>
@@ -1208,9 +1228,13 @@ sup a:hover { text-decoration: underline; }
 <script src="assets/recipes-part10.js"></script>
 <script src="assets/recipes-part11.js"></script>
 <script src="assets/recipes-part12.js"></script>
+<script src="assets/recipes-part13.js"></script>
 <script src="assets/refs.js"></script>
 <script src="assets/variants.js"></script>
 <script src="assets/variants2.js"></script>
+<script src="assets/variants3.js"></script>
+<script src="assets/season.js"></script>
+<script src="assets/town.js"></script>
 <script src="assets/remote.js"></script>
 <script src="assets/order.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>

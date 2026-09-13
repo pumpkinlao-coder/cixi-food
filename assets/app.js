@@ -2,13 +2,14 @@
 (function () {
   "use strict";
 
-  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10, RECIPES_11, RECIPES_12);
+  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10, RECIPES_11, RECIPES_12, RECIPES_13);
 
-  // 挂载「做法变体」：VARIANT_LIB / VARIANT_LIB2 以菜名索引，避免与 id 强耦合
+  // 挂载「做法变体」：VARIANT_LIB / VARIANT_LIB2 / VARIANT_LIB3 以菜名索引，避免与 id 强耦合
   (function () {
     var libs = [];
     if (typeof VARIANT_LIB !== "undefined") libs.push(VARIANT_LIB);
     if (typeof VARIANT_LIB2 !== "undefined") libs.push(VARIANT_LIB2);
+    if (typeof VARIANT_LIB3 !== "undefined") libs.push(VARIANT_LIB3);
     if (!libs.length) return;
     var pool = {};
     libs.forEach(function (lib) {
@@ -36,13 +37,21 @@
   var CAT_ORDER = ["sea", "river", "meat", "veg", "cured", "soup", "staple", "dessert"];
   var DIFF_NAME = { 1: "简单", 2: "中等", 3: "较难" };
 
-  var state = { kw: "", cat: "all", sort: "default", remote: false, fav: false };
+  var state = { kw: "", cat: "all", sort: "default", remote: false, fav: false, season: "all", town: "all" };
   var curRecipe = null;
   var curServe = 2;
   var CX = window.CX || {};
 
   function isRemote(id) {
     return (typeof REMOTE_RECIPES !== "undefined") && REMOTE_RECIPES.indexOf(id) >= 0;
+  }
+
+  // 时令 / 乡镇：按菜名索引的静态映射（season.js / town.js）
+  function seasonsOf(name) {
+    return (typeof SEASON_MAP !== "undefined" && SEASON_MAP[name]) || [];
+  }
+  function townOf(name) {
+    return (typeof TOWN_MAP !== "undefined" && TOWN_MAP[name]) || "";
   }
 
   function timeVal(s) {
@@ -66,6 +75,8 @@
     if (state.cat !== "all" && r.cat !== state.cat) return false;
     if (state.remote && !isRemote(r.id)) return false;
     if (state.fav && CX.fav && !CX.fav.is(r.id)) return false;
+    if (state.season !== "all" && seasonsOf(r.name).indexOf(state.season) < 0) return false;
+    if (state.town !== "all" && townOf(r.name) !== state.town) return false;
     var kw = state.kw.trim().toLowerCase();
     if (!kw) return true;
     var hay = (r.name + " " + r.desc + " " + r.tags.join(" ") + " " +
@@ -101,6 +112,8 @@
           '<span class="card-emoji">' + r.emoji + "</span>" +
           '<span class="chip chip-cat">' + cat.name + "</span>" +
           (r.tags.indexOf("名菜") >= 0 ? '<span class="chip chip-fame">名菜</span>' : "") +
+          (seasonsOf(r.name).length ? '<span class="chip chip-season">' + seasonsOf(r.name).join("/") + "令</span>" : "") +
+          (townOf(r.name) ? '<span class="chip chip-town">' + townOf(r.name) + "</span>" : "") +
         "</div>" +
         "<h3 class='card-name'>" + r.name + "</h3>" +
         "<p class='card-desc'>" + r.desc + "</p>" +
@@ -148,6 +161,47 @@
     html +=
       '<button class="pill pill-fav' + (state.fav ? " active" : "") + '" data-fav="1" title="只看已收藏的菜">' +
       "❤️ 我的收藏<span>" + favN + "</span></button>";
+    wrap.innerHTML = html;
+    renderSeasonPills();
+    renderTownPills();
+  }
+
+  function renderSeasonPills() {
+    var wrap = document.getElementById("seasonPills");
+    if (!wrap) return;
+    if (typeof SEASON_MAP === "undefined") { wrap.innerHTML = ""; return; }
+    var counts = {};
+    RECIPES.forEach(function (r) {
+      seasonsOf(r.name).forEach(function (s) { counts[s] = (counts[s] || 0) + 1; });
+    });
+    var total = RECIPES.filter(function (r) { return seasonsOf(r.name).length; }).length;
+    var html = '<button class="pill pill-season' + (state.season === "all" ? " active" : "") +
+      '" data-season="all" title="只看时令性明确的菜">全部时令<span>' + total + "</span></button>";
+    (typeof SEASON_ORDER !== "undefined" ? SEASON_ORDER : []).forEach(function (s) {
+      if (!counts[s]) return;
+      html += '<button class="pill pill-season' + (state.season === s ? " active" : "") +
+        '" data-season="' + s + '" title="' + s + '令上市的时令菜">' + s + "令<span>" + counts[s] + "</span></button>";
+    });
+    wrap.innerHTML = html;
+  }
+
+  function renderTownPills() {
+    var wrap = document.getElementById("townPills");
+    if (!wrap) return;
+    if (typeof TOWN_MAP === "undefined") { wrap.innerHTML = ""; return; }
+    var counts = {};
+    RECIPES.forEach(function (r) {
+      var t = townOf(r.name);
+      if (t) counts[t] = (counts[t] || 0) + 1;
+    });
+    var total = RECIPES.filter(function (r) { return townOf(r.name); }).length;
+    var html = '<button class="pill pill-town' + (state.town === "all" ? " active" : "") +
+      '" data-town="all" title="只看出处可考的乡镇代表菜">全部乡镇<span>' + total + "</span></button>";
+    (typeof TOWN_ORDER !== "undefined" ? TOWN_ORDER : []).forEach(function (t) {
+      if (!counts[t]) return;
+      html += '<button class="pill pill-town' + (state.town === t ? " active" : "") +
+        '" data-town="' + t + '" title="' + t + '的代表菜">' + t + "<span>" + counts[t] + "</span></button>";
+    });
     wrap.innerHTML = html;
   }
 
@@ -263,9 +317,14 @@
       }
       remoteBadge.style.display = "inline-flex";
     }
-    document.getElementById("modalTags").innerHTML = r.tags
+    var chipsHtml = r.tags
       .map(function (t) { return '<span class="tag">' + t + "</span>"; })
       .join("");
+    seasonsOf(r.name).forEach(function (s) {
+      chipsHtml += '<span class="tag tag-season">' + s + "令</span>";
+    });
+    if (townOf(r.name)) chipsHtml += '<span class="tag tag-town">' + townOf(r.name) + "</span>";
+    document.getElementById("modalTags").innerHTML = chipsHtml;
     document.getElementById("modalIng").innerHTML = "";
     renderCurIngredients();
     renderCurNutrition();
@@ -377,6 +436,28 @@
       renderGrid();
     });
 
+    var seasonWrap = document.getElementById("seasonPills");
+    if (seasonWrap) {
+      seasonWrap.addEventListener("click", function (e) {
+        var btn = e.target.closest(".pill");
+        if (!btn) return;
+        state.season = btn.dataset.season;
+        renderPills();
+        renderGrid();
+      });
+    }
+
+    var townWrap = document.getElementById("townPills");
+    if (townWrap) {
+      townWrap.addEventListener("click", function (e) {
+        var btn = e.target.closest(".pill");
+        if (!btn) return;
+        state.town = btn.dataset.town;
+        renderPills();
+        renderGrid();
+      });
+    }
+
     var search = document.getElementById("searchInput");
     search.addEventListener("input", function () {
       state.kw = search.value;
@@ -418,6 +499,7 @@
     document.getElementById("randomHero").addEventListener("click", randomPick);
     document.getElementById("resetBtn").addEventListener("click", function () {
       state.kw = ""; state.cat = "all"; state.sort = "default"; state.remote = false; state.fav = false;
+      state.season = "all"; state.town = "all";
       search.value = ""; sort.value = "default";
       renderPills();
       renderGrid();
