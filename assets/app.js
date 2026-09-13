@@ -2,14 +2,15 @@
 (function () {
   "use strict";
 
-  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10, RECIPES_11, RECIPES_12, RECIPES_13);
+  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10, RECIPES_11, RECIPES_12, RECIPES_13, RECIPES_14);
 
-  // 挂载「做法变体」：VARIANT_LIB / VARIANT_LIB2 / VARIANT_LIB3 以菜名索引，避免与 id 强耦合
+  // 挂载「做法变体」：VARIANT_LIB ~ VARIANT_LIB4 以菜名索引，避免与 id 强耦合
   (function () {
     var libs = [];
     if (typeof VARIANT_LIB !== "undefined") libs.push(VARIANT_LIB);
     if (typeof VARIANT_LIB2 !== "undefined") libs.push(VARIANT_LIB2);
     if (typeof VARIANT_LIB3 !== "undefined") libs.push(VARIANT_LIB3);
+    if (typeof VARIANT_LIB4 !== "undefined") libs.push(VARIANT_LIB4);
     if (!libs.length) return;
     var pool = {};
     libs.forEach(function (lib) {
@@ -52,6 +53,14 @@
   }
   function townOf(name) {
     return (typeof TOWN_MAP !== "undefined" && TOWN_MAP[name]) || "";
+  }
+  // 月度时令（month.js）：只收录上市月份有据可依的菜
+  function monthsOf(name) {
+    return (typeof MONTH_MAP !== "undefined" && MONTH_MAP[name]) || [];
+  }
+  function seasonOfMonth(m) {
+    if (typeof MONTH_SEASON !== "undefined" && MONTH_SEASON[m]) return MONTH_SEASON[m];
+    return ["冬", "冬", "春", "春", "春", "夏", "夏", "夏", "秋", "秋", "秋", "冬"][m - 1] || "";
   }
 
   function timeVal(s) {
@@ -203,6 +212,50 @@
         '" data-town="' + t + '" title="' + t + '的代表菜">' + t + "<span>" + counts[t] + "</span></button>";
     });
     wrap.innerHTML = html;
+  }
+
+  function renderSeasonStrip() {
+    var strip = document.getElementById("seasonStrip");
+    if (!strip) return;
+    if (typeof MONTH_MAP === "undefined") { strip.hidden = true; return; }
+    var m = new Date().getMonth() + 1;
+    var list = RECIPES.filter(function (r) { return monthsOf(r.name).indexOf(m) >= 0; });
+    if (!list.length) { strip.hidden = true; return; }
+    var season = seasonOfMonth(m);
+    var badge = document.getElementById("seasonStripBadge");
+    if (badge) badge.textContent = m + " 月 · " + season + "令";
+    var text = document.getElementById("seasonStripText");
+    if (text) {
+      text.innerHTML = "眼下正是 <b>" + m + " 月</b> 当令的时候，慈溪人桌上常有这 <b>" + list.length + "</b> 道，点菜名可直接看做法。";
+    }
+    var items = document.getElementById("seasonStripItems");
+    var show = list.slice(0, 24);
+    if (items) {
+      var html = show.map(function (r) {
+        return '<button type="button" class="season-chip" data-id="' + r.id + '">' + r.emoji + " " + r.name + "</button>";
+      }).join("");
+      if (list.length > show.length) {
+        html += '<span class="season-chip" style="cursor:default">……等 ' + list.length + " 道</span>";
+      }
+      items.innerHTML = html;
+      items.querySelectorAll(".season-chip[data-id]").forEach(function (b) {
+        b.addEventListener("click", function () { openModal(parseInt(b.dataset.id, 10), filtered()); });
+      });
+    }
+    var more = document.getElementById("seasonStripMore");
+    if (more) {
+      var seasonTotal = RECIPES.filter(function (r) { return seasonsOf(r.name).indexOf(season) >= 0; }).length;
+      more.hidden = false;
+      more.textContent = "查看" + season + "令全部 " + seasonTotal + " 道 →";
+      more.onclick = function () {
+        state.season = season;
+        renderPills();
+        renderGrid();
+        var sec = document.getElementById("recipes");
+        if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+    }
+    strip.hidden = false;
   }
 
   function byIdMap() {
@@ -707,6 +760,7 @@
     var orderMenu = document.getElementById("orderMenu");
     var orderSummary = document.getElementById("orderSummary");
     var orderState = { people: 4, drink: false };
+    var lastOrder = null;
 
     if (orderOverlay && typeof generateOrder === "function") {
       document.getElementById("orderOpen").addEventListener("click", function () {
@@ -741,11 +795,58 @@
         orderForm.hidden = false;
         orderResult.hidden = true;
       });
+      var orderCopyBtn = document.getElementById("orderCopy");
+      if (orderCopyBtn) orderCopyBtn.addEventListener("click", copyOrderMenu);
     }
 
     function closeOrder() {
       orderOverlay.classList.remove("open");
       document.body.classList.remove("lock");
+    }
+
+    function copyOrderMenu() {
+      if (!lastOrder) return;
+      var groups = [
+        { title: "冷菜（先上）", ids: lastOrder.cold },
+        { title: "热菜", ids: lastOrder.hot },
+        { title: "汤羹", ids: lastOrder.soup },
+        { title: "主食点心", ids: lastOrder.staple }
+      ];
+      var lines = ["慈溪味 · " + lastOrder.people + " 人" + (lastOrder.drink ? "（喝点酒）" : "") + " 一桌菜"];
+      var total = 0;
+      groups.forEach(function (g) {
+        if (!g.ids.length) return;
+        lines.push("");
+        lines.push("【" + g.title + "】");
+        g.ids.forEach(function (id) {
+          var r = lastOrder.byId[id];
+          if (!r) return;
+          total++;
+          lines.push("· " + r.name + "（" + r.time + "）");
+        });
+      });
+      lines.push("");
+      lines.push("共 " + total + " 道 · 出自「慈溪味 · 慈溪菜菜谱大全」");
+      var text = lines.join("\n");
+      var done = function () {
+        var btn = document.getElementById("orderCopy");
+        if (btn) { btn.textContent = "✅ 已复制"; setTimeout(function () { btn.textContent = "📋 复制菜单"; }, 1200); }
+      };
+      var fallback = function () {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) { /* 忽略 */ }
+        document.body.removeChild(ta);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else {
+        fallback();
+      }
     }
 
     function showOrderResult() {
@@ -769,6 +870,7 @@
       orderMenu.innerHTML = html;
       var total = o.cold.length + o.hot.length + o.soup.length + o.staple.length;
       orderSummary.textContent = orderState.people + " 人" + (orderState.drink ? " · 喝点" : "") + " · 共 " + total + " 道";
+      lastOrder = { cold: o.cold, hot: o.hot, soup: o.soup, staple: o.staple, byId: byId, people: orderState.people, drink: orderState.drink };
       orderForm.hidden = true;
       orderResult.hidden = false;
       orderMenu.querySelectorAll(".order-item").forEach(function (b) {
@@ -871,6 +973,7 @@
     initStats();
     renderPills();
     renderGrid();
+    renderSeasonStrip();
     bind();
     initChart();
     renderShopList();

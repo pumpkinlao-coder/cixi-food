@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>慈溪味 · 慈溪菜菜谱大全</title>
-<meta name="description" content="慈溪菜菜谱查询网站：521道慈溪与甬帮菜做法，涵盖海鲜河鲜、肉类时蔬、腌糟醉鲜、汤羹炖品、主食点心与甜品饮品，附完整材料与步骤。">
+<meta name="description" content="慈溪菜菜谱查询网站：561道慈溪与甬帮菜做法，涵盖海鲜河鲜、肉类时蔬、腌糟醉鲜、汤羹炖品、主食点心与甜品饮品，附完整材料与步骤。">
 <meta name="theme-color" content="#a8462e">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
@@ -139,6 +139,32 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ===== Sections ===== */
 main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+/* 本月时令 */
+.season-strip {
+  margin-top: 1.4rem; padding: 1rem 1.15rem;
+  border: 1px solid rgba(214,158,46,0.42); border-radius: 18px;
+  background: linear-gradient(135deg, rgba(214,158,46,0.10), rgba(214,158,46,0.03));
+}
+.season-strip-head { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+.season-strip-badge {
+  flex: none; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em;
+  color: #fff; background: #b8862b; border-radius: 999px; padding: 0.24rem 0.75rem;
+}
+.season-strip-text { flex: 1 1 16rem; font-size: 0.9rem; color: var(--ink); margin: 0; }
+.season-strip-text b { color: #8a6d3b; }
+.season-strip-more { flex: none; font-size: 0.84rem; padding: 0.34rem 0.85rem; }
+.season-strip-items { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.75rem; }
+.season-chip {
+  border: 1px solid rgba(214,158,46,0.45); background: var(--bg2); color: var(--ink);
+  border-radius: 999px; padding: 0.32rem 0.8rem; font-size: 0.85rem; cursor: pointer;
+  font-family: inherit; transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+.season-chip:hover { background: #b8862b; color: #fff; transform: translateY(-1px); }
+@media (max-width: 640px) {
+  .season-strip { padding: 0.85rem 0.9rem; }
+  .season-strip-text { font-size: 0.84rem; }
+  .season-chip { font-size: 0.8rem; padding: 0.28rem 0.68rem; }
+}
 .section { padding: 2.2rem 0; }
 #recipes { padding-top: 0.8rem; }
 .section-head { margin-bottom: 1rem; }
@@ -792,7 +818,7 @@ sup a:hover { text-decoration: underline; }
 <div class="hero" id="top">
   <div class="hero-inner">
     <div class="hero-search-wrap">
-      <div class="hero-count" title="共收录 521 道菜谱"><b id="statTotal">521</b></div>
+      <div class="hero-count" title="共收录 561 道菜谱"><b id="statTotal">561</b></div>
       <div class="hero-search" role="search">
         <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5 L17.5 17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <input type="search" id="searchInput" placeholder="搜菜名或食材，如「黄鱼」「年糕」「杨梅」…" aria-label="搜索菜谱">
@@ -804,6 +830,16 @@ sup a:hover { text-decoration: underline; }
 </div>
 
 <main>
+  <!-- ===== 本月时令 ===== -->
+  <section class="season-strip" id="seasonStrip" hidden>
+    <div class="season-strip-head">
+      <span class="season-strip-badge" id="seasonStripBadge"></span>
+      <p class="season-strip-text" id="seasonStripText"></p>
+      <button class="btn btn-ghost season-strip-more" id="seasonStripMore" type="button" hidden></button>
+    </div>
+    <div class="season-strip-items" id="seasonStripItems"></div>
+  </section>
+
   <!-- ===== 菜谱总览 ===== -->
   <section class="section" id="recipes">
     <div class="section-head">
@@ -967,7 +1003,7 @@ sup a:hover { text-decoration: underline; }
     </div>
 
     <div class="about-stats">
-      <div class="about-stat"><b>521</b><span>道慈溪与甬帮菜</span></div>
+      <div class="about-stat"><b>561</b><span>道慈溪与甬帮菜</span></div>
       <div class="about-stat"><b>8</b><span>大食材与做法分类</span></div>
       <div class="about-stat"><b>100%</b><span>附材料与分步做法</span></div>
       <div class="about-stat"><b>0</b><span>外网依赖 · 纯静态</span></div>
@@ -1154,6 +1190,7 @@ sup a:hover { text-decoration: underline; }
         <span id="orderSummary"></span>
         <div class="order-actions">
           <button class="btn btn-ghost" id="orderAgain" type="button">🔄 换一桌</button>
+          <button class="btn btn-ghost" id="orderCopy" type="button">📋 复制菜单</button>
           <button class="btn btn-accent" id="orderEdit" type="button">✏️ 改条件</button>
         </div>
       </div>
@@ -1229,12 +1266,15 @@ sup a:hover { text-decoration: underline; }
 <script src="assets/recipes-part11.js"></script>
 <script src="assets/recipes-part12.js"></script>
 <script src="assets/recipes-part13.js"></script>
+<script src="assets/recipes-part14.js"></script>
 <script src="assets/refs.js"></script>
 <script src="assets/variants.js"></script>
 <script src="assets/variants2.js"></script>
 <script src="assets/variants3.js"></script>
+<script src="assets/variants4.js"></script>
 <script src="assets/season.js"></script>
 <script src="assets/town.js"></script>
+<script src="assets/month.js"></script>
 <script src="assets/remote.js"></script>
 <script src="assets/order.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>
