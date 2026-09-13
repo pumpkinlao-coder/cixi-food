@@ -1,5 +1,5 @@
 /* 慈溪味 Service Worker — 缓存优先，支持离线访问 */
-var CACHE_NAME = "cixi-cache-v10";
+var CACHE_NAME = "cixi-cache-v11";
 
 var CORE_ASSETS = [
   "./",

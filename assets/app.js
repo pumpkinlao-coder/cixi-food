@@ -266,12 +266,43 @@
     wrap.innerHTML = html;
   }
 
+  // 子筛选的展开状态：窄屏默认收起，用户手动调过之后就不再随窗口变化自动改
+  var filterSubTouched = false;
+
   function setFilterSub(open) {
     var sub = document.getElementById("filterSub");
     if (sub) sub.hidden = !open;
+    // 展开时给筛选条加个标记：窄屏下这类长面板不吸顶，免得压住菜谱列表
+    var bar = document.querySelector(".filter-bar");
+    if (bar) bar.classList.toggle("filter-bar-open", !!open);
     var btn = document.getElementById("filterToggle");
     if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
     updateFilterToggleLabel();
+  }
+
+  function initFilterSub() {
+    setFilterSub(filterSubDefault());
+  }
+
+  // 窄屏或矮屏（横屏手机）都默认收起：这两种情况下展开的筛选条会压住菜谱列表
+  function filterSubDefault() {
+    return !(window.innerWidth <= 720 || window.innerHeight <= 640);
+  }
+
+  // 当前生效的子筛选，用于收起时也能看见在筛什么
+  function filterSummary() {
+    var parts = [];
+    if (state.season !== "all") parts.push(state.season + "令");
+    if (state.town !== "all") parts.push(state.town);
+    if (state.time !== "all") {
+      var lv = timeLevelDef(state.time);
+      if (lv) parts.push(lv.short);
+    }
+    if (state.tool !== "all") {
+      var d = (typeof TOOLS !== "undefined") ? TOOLS[state.tool] : null;
+      if (d) parts.push(d.name);
+    }
+    return parts;
   }
 
   function updateFilterToggleLabel() {
@@ -279,9 +310,17 @@
     if (!btn) return;
     var sub = document.getElementById("filterSub");
     var open = sub ? !sub.hidden : true;
-    var n = 0;
-    ["season", "town", "time", "tool"].forEach(function (k) { if (state[k] !== "all") n++; });
-    btn.textContent = open ? "收起筛选 ▲" : (n ? "更多筛选 ▼ · 已选 " + n + " 项" : "更多筛选 ▼");
+    var parts = filterSummary();
+    var brief = parts.slice(0, 2).join(" · ") + (parts.length > 2 ? " 等 " + parts.length + " 项" : "");
+    if (open) {
+      btn.textContent = parts.length ? "收起筛选 ▲ · 已选 " + parts.length + " 项" : "收起筛选 ▲";
+      btn.title = parts.length ? "当前：" + parts.join(" · ") + "，点一下收起" : "收起用时、厨具、时令、乡镇筛选";
+    } else {
+      btn.textContent = parts.length ? "更多筛选 ▼ · " + brief : "更多筛选 ▼";
+      btn.title = parts.length
+        ? "当前：" + parts.join(" · ") + "，点开可修改"
+        : "展开用时、厨具、时令、乡镇筛选";
+    }
   }
 
   // 30 分钟内能上桌的，卡片上给个闪电标
@@ -365,6 +404,9 @@
       more.textContent = "查看" + season + "令全部 " + seasonTotal + " 道 →";
       more.onclick = function () {
         state.season = season;
+        // 把子筛选展开，让刚选上的时令在筛选条里看得见，不至于悄悄生效
+        filterSubTouched = true;
+        setFilterSub(true);
         renderPills();
         renderGrid();
         var sec = document.getElementById("recipes");
@@ -859,7 +901,15 @@
     }).join("");
     host.querySelectorAll(".dl-go").forEach(function (b) {
       b.addEventListener("click", function () {
+        // 词典里的「N 道菜」按全部菜谱统计，跳转前先清掉其它筛选，保证数字对得上
         state.kw = b.dataset.q;
+        state.cat = "all";
+        state.remote = false;
+        state.fav = false;
+        state.season = "all";
+        state.town = "all";
+        state.time = "all";
+        state.tool = "all";
         var search = document.getElementById("searchInput");
         if (search) search.value = b.dataset.q;
         var ov = document.getElementById("dialectOverlay");
@@ -867,6 +917,7 @@
         if (!document.getElementById("overlay").classList.contains("open")) {
           document.body.classList.remove("lock");
         }
+        renderPills();
         renderGrid();
         var sec = document.getElementById("recipes");
         if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1050,13 +1101,23 @@
       });
     }
 
-    // 折叠「更多筛选」，窄屏默认收起，免得筛选条占掉半个屏幕
+    // 折叠「更多筛选」：窄屏默认收起，免得筛选条占掉半个屏幕
     var filterToggle = document.getElementById("filterToggle");
     if (filterToggle) {
-      setFilterSub(window.innerWidth > 720);
       filterToggle.addEventListener("click", function () {
         var sub = document.getElementById("filterSub");
+        filterSubTouched = true;
         setFilterSub(sub ? sub.hidden : true);
+      });
+      // 只在宽度跨过断点时重新取默认值。不看高度变化，否则手机滚动时地址栏
+      // 伸缩引发的 resize 会让筛选条自己收起又展开。
+      var lastFilterW = window.innerWidth;
+      window.addEventListener("resize", function () {
+        var w = window.innerWidth;
+        if (filterSubTouched) { lastFilterW = w; return; }
+        if ((w <= 720) === (lastFilterW <= 720)) { lastFilterW = w; return; }
+        lastFilterW = w;
+        setFilterSub(filterSubDefault());
       });
     }
 
@@ -1073,6 +1134,7 @@
           state.tool = "base";
           state.sort = "time";
           sort.value = "time";
+          filterSubTouched = true;
           setFilterSub(true);
         }
         renderPills();
@@ -1755,6 +1817,8 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    // 先定子筛选的折叠状态，再渲染，避免窄屏上先展开再收起的闪动
+    initFilterSub();
     initStats();
     renderPills();
     renderGrid();

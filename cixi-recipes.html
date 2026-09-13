@@ -935,7 +935,8 @@ sup a:hover { text-decoration: underline; }
 /* ===== 增强功能三批：用时与厨具筛选 ===== */
 .filter-toggle {
   border: 1px solid var(--rule); background: var(--bg2); color: var(--muted);
-  border-radius: 999px; padding: 0.34rem 0.8rem; font-size: 0.8rem; white-space: nowrap;
+  border-radius: 999px; padding: 0.34rem 0.8rem; font-size: 0.8rem;
+  max-width: 100%; text-align: left; line-height: 1.5;
 }
 .filter-toggle:hover { border-color: var(--accent); color: var(--accent); }
 .quick-btn {
@@ -959,6 +960,12 @@ sup a:hover { text-decoration: underline; }
 }
 .mt-chip.mt-need { background: rgba(214,158,46,0.16); color: #7a4a12; }
 .mt-chip.mt-nofire { background: rgba(95,127,85,0.14); color: var(--accent2); }
+
+/* 窄屏或矮屏（横屏手机）展开子筛选时，筛选条不再吸顶。
+   否则四行子筛选加起来能占掉大半个屏幕，把菜谱列表挡在后面。 */
+@media (max-width: 720px), (max-height: 640px) {
+  .filter-bar.filter-bar-open { position: static; }
+}
 
 @media (max-width: 640px) {
   .nt-label { display: none; }
