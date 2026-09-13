@@ -2,15 +2,26 @@
 (function () {
   "use strict";
 
-  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10, RECIPES_11);
+  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9, RECIPES_10, RECIPES_11, RECIPES_12);
 
-  // 挂载「做法变体」：VARIANT_LIB 以菜名索引，避免与 id 强耦合
-  if (typeof VARIANT_LIB !== "undefined") {
+  // 挂载「做法变体」：VARIANT_LIB / VARIANT_LIB2 以菜名索引，避免与 id 强耦合
+  (function () {
+    var libs = [];
+    if (typeof VARIANT_LIB !== "undefined") libs.push(VARIANT_LIB);
+    if (typeof VARIANT_LIB2 !== "undefined") libs.push(VARIANT_LIB2);
+    if (!libs.length) return;
+    var pool = {};
+    libs.forEach(function (lib) {
+      Object.keys(lib).forEach(function (k) {
+        pool[k] = (pool[k] || []).concat(lib[k]);
+      });
+    });
     RECIPES.forEach(function (r) {
-      var extra = VARIANT_LIB[r.name];
+      var extra = pool[r.name];
       if (extra && extra.length) r.variants = (r.variants || []).concat(extra);
     });
-  }
+  })();
+
 
   var CATS = {
     sea:     { name: "海鲜",   emoji: "🦀", cls: "c-sea" },
@@ -274,7 +285,11 @@
         .join("");
     };
     if (variants.length) {
-      var labels = ["做法一 · 常规"].concat(variants.map(function (v, i) { return "做法" + ["二", "三", "四"][i] + " · " + v.label.replace(/^做法[一二三四]\s*[·．.、]?\s*/, ""); }));
+      var ORD = ["二", "三", "四", "五", "六", "七", "八"];
+      var labels = ["做法一 · 常规"].concat(variants.map(function (v, i) {
+        var n = ORD[i] || String(i + 2);
+        return "做法" + n + " · " + String(v.label || "").replace(/^做法[一二三四五六七八\d]+\s*[·．.、]?\s*/, "");
+      }));
       tabsEl.innerHTML = labels.map(function (lb, i) {
         return '<button type="button" class="variant-tab' + (i === 0 ? " active" : "") + '" data-v="' + i + '">' + lb + "</button>";
       }).join("");
