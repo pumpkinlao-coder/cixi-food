@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8);
+  var RECIPES = RECIPES_1.concat(RECIPES_2, RECIPES_3, RECIPES_4, RECIPES_5, RECIPES_6, RECIPES_7, RECIPES_8, RECIPES_9);
 
   var CATS = {
     sea:     { name: "海鲜",   emoji: "🦀", cls: "c-sea" },
