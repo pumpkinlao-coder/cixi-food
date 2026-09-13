@@ -932,8 +932,38 @@ sup a:hover { text-decoration: underline; }
 .dl-none { font-size: 0.8rem; color: var(--muted); }
 .dl-foot a { font-size: 0.74rem; color: var(--muted); margin-left: auto; }
 
+/* ===== 增强功能三批：用时与厨具筛选 ===== */
+.filter-toggle {
+  border: 1px solid var(--rule); background: var(--bg2); color: var(--muted);
+  border-radius: 999px; padding: 0.34rem 0.8rem; font-size: 0.8rem; white-space: nowrap;
+}
+.filter-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.quick-btn {
+  border: 1px solid rgba(168,70,46,0.35); background: rgba(168,70,46,0.07); color: var(--accent);
+  border-radius: 999px; padding: 0.34rem 0.9rem; font-size: 0.82rem; font-weight: 600; white-space: nowrap;
+  transition: all 0.16s;
+}
+.quick-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.quick-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pill-time, .pill-tool { font-size: 0.84rem; padding: 0.34rem 0.8rem; }
+.pill-time.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.pill-time.active span { background: rgba(255,255,255,0.18); color: #fff; }
+.pill-tool.active { background: #8a6d3b; border-color: #8a6d3b; color: #fff; }
+.pill-tool.active span { background: rgba(255,255,255,0.18); color: #fff; }
+.chip-fast { color: #8a4a12; background: rgba(168,70,46,0.13); border: 1px solid rgba(168,70,46,0.36); font-weight: 600; }
+.modal-tools { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.55rem; }
+.mt-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.76rem; padding: 0.14rem 0.55rem; border-radius: 999px;
+  background: rgba(46,38,32,0.05); color: var(--muted);
+}
+.mt-chip.mt-need { background: rgba(214,158,46,0.16); color: #7a4a12; }
+.mt-chip.mt-nofire { background: rgba(95,127,85,0.14); color: var(--accent2); }
+
 @media (max-width: 640px) {
   .nt-label { display: none; }
+  .filter-right { gap: 0.5rem; }
+  .quick-btn, .filter-toggle { padding: 0.3rem 0.7rem; font-size: 0.76rem; }
   .cook-text { font-size: 1.2rem; }
   .cook-modal, .dialect-modal { padding: 1.3rem 1rem 1.1rem; }
   .week-day { flex-direction: column; gap: 0.35rem; }
@@ -1001,6 +1031,8 @@ sup a:hover { text-decoration: underline; }
       <div class="filter-row">
         <div id="catPills" style="display:contents"></div>
         <div class="filter-right">
+          <button class="filter-toggle" id="filterToggle" type="button" aria-expanded="true" aria-controls="filterSub">收起筛选 ▲</button>
+          <button class="quick-btn" id="quickBtn" type="button" title="30 分钟内、只用一口锅，按用时从短到长排">⚡ 下班快手菜</button>
           <span class="result-count" id="resultCount"></span>
           <label for="sortSelect">排序</label>
           <select class="sort-select" id="sortSelect">
@@ -1010,13 +1042,23 @@ sup a:hover { text-decoration: underline; }
           </select>
         </div>
       </div>
-      <div class="filter-row filter-row-sub">
-        <span class="filter-label">时令</span>
-        <div id="seasonPills" style="display:contents"></div>
-      </div>
-      <div class="filter-row filter-row-sub">
-        <span class="filter-label">乡镇</span>
-        <div id="townPills" style="display:contents"></div>
+      <div class="filter-sub" id="filterSub">
+        <div class="filter-row filter-row-sub">
+          <span class="filter-label">用时</span>
+          <div id="timePills" style="display:contents"></div>
+        </div>
+        <div class="filter-row filter-row-sub">
+          <span class="filter-label">厨具</span>
+          <div id="toolPills" style="display:contents"></div>
+        </div>
+        <div class="filter-row filter-row-sub">
+          <span class="filter-label">时令</span>
+          <div id="seasonPills" style="display:contents"></div>
+        </div>
+        <div class="filter-row filter-row-sub">
+          <span class="filter-label">乡镇</span>
+          <div id="townPills" style="display:contents"></div>
+        </div>
       </div>
     </div>
 
@@ -1192,6 +1234,10 @@ sup a:hover { text-decoration: underline; }
         <p>写下家里现有的几样食材，例如「蛎黄 年糕 雪菜」，会列出能碰上的菜、还差哪几样，也能只看「现在就能做」的那几道。</p>
       </div>
       <div class="about-feature">
+        <h4>⚡ 快手与厨具筛选</h4>
+        <p>按用时挑（20 / 30 / 45 分钟、1 小时内、1 小时以上），或按厨具挑：只用一口锅、要上笼蒸、要砂锅、要烤箱、不用开火。点「⚡ 下班快手菜」直接筛出 30 分钟内、一口锅能做的菜。</p>
+      </div>
+      <div class="about-feature">
         <h4>🗂 分类与时令筛选</h4>
         <p>按八大类浏览，也可按春/夏/秋/冬、按二十个乡镇筛选，或只看食材普通超市就买得到的「外地可做」。</p>
       </div>
@@ -1272,6 +1318,7 @@ sup a:hover { text-decoration: underline; }
         <h2 id="modalTitle">菜名</h2>
         <div class="modal-cat" id="modalCat"></div>
         <div class="modal-tags" id="modalTags"></div>
+        <div class="modal-tools" id="modalTools" hidden></div>
       </div>
     </div>
     <p class="modal-desc" id="modalDesc"></p>
@@ -1531,6 +1578,7 @@ sup a:hover { text-decoration: underline; }
 <script src="assets/month.js"></script>
 <script src="assets/dialect.js"></script>
 <script src="assets/prep.js"></script>
+<script src="assets/kitchen.js"></script>
 <script src="assets/remote.js"></script>
 <script src="assets/order.js"></script>
 <script src="./_shared/js/echarts.min.js"></script>

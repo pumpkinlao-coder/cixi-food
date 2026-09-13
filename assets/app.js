@@ -38,7 +38,7 @@
   var CAT_ORDER = ["sea", "river", "meat", "veg", "cured", "soup", "staple", "dessert"];
   var DIFF_NAME = { 1: "简单", 2: "中等", 3: "较难" };
 
-  var state = { kw: "", cat: "all", sort: "default", remote: false, fav: false, season: "all", town: "all" };
+  var state = { kw: "", cat: "all", sort: "default", remote: false, fav: false, season: "all", town: "all", time: "all", tool: "all" };
   var curRecipe = null;
   var curServe = 2;
   var CX = window.CX || {};
@@ -63,21 +63,17 @@
     return ["冬", "冬", "春", "春", "春", "夏", "夏", "夏", "秋", "秋", "秋", "冬"][m - 1] || "";
   }
 
+  // 时长换算统一走 features.js 的 CX.time.parse，避免排序与筛选两处口径不一致
   function timeVal(s) {
-    if (!s) return 0;
-    if (s.indexOf("半天") >= 0) return 240;
-    var h = s.match(/(\d+(?:\.\d+)?)\s*小时/);
-    if (h) return Math.round(parseFloat(h[1]) * 60);
-    var m = s.match(/(\d+)\s*分钟/);
-    if (m) return parseInt(m[1], 10);
-    var d = s.match(/(\d+)\s*天/);
-    if (d) return parseInt(d[1], 10) * 480;
-    if (s.indexOf("数日") >= 0) return 1920;
-    if (s.indexOf("半月") >= 0) return 7200;
-    var mo = s.match(/(\d+)\s*个月/);
-    if (mo) return parseInt(mo[1], 10) * 14400;
-    if (s.indexOf("数月") >= 0) return 43200;
-    return 0;
+    return (CX.time && CX.time.parse) ? CX.time.parse(s) : 0;
+  }
+
+  function timeLevelDef(k) {
+    if (typeof TIME_LEVELS === "undefined") return null;
+    for (var i = 0; i < TIME_LEVELS.length; i++) {
+      if (TIME_LEVELS[i].k === k) return TIME_LEVELS[i];
+    }
+    return null;
   }
 
   // 搜索用文本：菜名、描述、标签、食材、小贴士，再加上本地叫法与标准名的互认写法。
@@ -110,6 +106,24 @@
     if (state.fav && CX.fav && !CX.fav.is(r.id)) return false;
     if (state.season !== "all" && seasonsOf(r.name).indexOf(state.season) < 0) return false;
     if (state.town !== "all" && townOf(r.name) !== state.town) return false;
+    // 用时：档位是累积的，「30 分钟内」含 20 分钟内的菜
+    if (state.time !== "all") {
+      var mins = timeVal(r.time);
+      var lv = timeLevelDef(state.time);
+      if (!mins || !lv) return false;
+      if (lv.max && mins > lv.max) return false;
+      if (lv.min && mins < lv.min) return false;
+    }
+    // 厨具：一口锅 = 不用专门厨具且不用开火之外的都算；要蒸笼等则按需命中
+    if (state.tool !== "all" && CX.tools) {
+      if (state.tool === "base") {
+        if (CX.tools.nofire(r) || CX.tools.of(r).length) return false;
+      } else if (state.tool === "nofire") {
+        if (!CX.tools.nofire(r)) return false;
+      } else if (CX.tools.of(r).indexOf(state.tool) < 0) {
+        return false;
+      }
+    }
     var kw = state.kw.trim().toLowerCase();
     if (!kw) return true;
     return hayOf(r).indexOf(kw) >= 0;
@@ -145,6 +159,7 @@
           (r.tags.indexOf("名菜") >= 0 ? '<span class="chip chip-fame">名菜</span>' : "") +
           (seasonsOf(r.name).length ? '<span class="chip chip-season">' + seasonsOf(r.name).join("/") + "令</span>" : "") +
           (townOf(r.name) ? '<span class="chip chip-town">' + townOf(r.name) + "</span>" : "") +
+          fastChip(r) +
         "</div>" +
         "<h3 class='card-name'>" + r.name + "</h3>" +
         "<p class='card-desc'>" + r.desc + "</p>" +
@@ -195,6 +210,85 @@
     wrap.innerHTML = html;
     renderSeasonPills();
     renderTownPills();
+    renderTimePills();
+    renderToolPills();
+    updateFilterToggleLabel();
+    var qb = document.getElementById("quickBtn");
+    if (qb) qb.classList.toggle("active", state.time === "t30" && state.tool === "base");
+  }
+
+  // 用时档：档位是累积的，所以「1 小时内」的计数包含更快的那几档
+  function renderTimePills() {
+    var wrap = document.getElementById("timePills");
+    if (!wrap || typeof TIME_LEVELS === "undefined") return;
+    var counts = {};
+    var known = 0;
+    RECIPES.forEach(function (r) {
+      var v = timeVal(r.time);
+      if (!v) return;
+      known++;
+      TIME_LEVELS.forEach(function (lv) {
+        if (lv.max && v <= lv.max) counts[lv.k] = (counts[lv.k] || 0) + 1;
+        if (lv.min && v >= lv.min) counts[lv.k] = (counts[lv.k] || 0) + 1;
+      });
+    });
+    var html = '<button class="pill pill-time' + (state.time === "all" ? " active" : "") +
+      '" data-time="all" title="不限用时">全部用时<span>' + known + "</span></button>";
+    TIME_LEVELS.forEach(function (lv) {
+      if (!counts[lv.k]) return;
+      html += '<button class="pill pill-time' + (state.time === lv.k ? " active" : "") +
+        '" data-time="' + lv.k + '" title="' + lv.label + '">' + lv.short +
+        "<span>" + counts[lv.k] + "</span></button>";
+    });
+    wrap.innerHTML = html;
+  }
+
+  // 厨具：一口锅与不用开火互斥，要砂锅要蒸笼这类按「需要」计入，可重叠
+  function renderToolPills() {
+    var wrap = document.getElementById("toolPills");
+    if (!wrap || !CX.tools || typeof TOOLS === "undefined") return;
+    var counts = {};
+    RECIPES.forEach(function (r) {
+      if (CX.tools.nofire(r)) { counts.nofire = (counts.nofire || 0) + 1; return; }
+      var t = CX.tools.of(r);
+      if (!t.length) { counts.base = (counts.base || 0) + 1; return; }
+      t.forEach(function (k) { counts[k] = (counts[k] || 0) + 1; });
+    });
+    var html = '<button class="pill pill-tool' + (state.tool === "all" ? " active" : "") +
+      '" data-tool="all" title="不限厨具">全部厨具<span>' + RECIPES.length + "</span></button>";
+    (typeof TOOL_ORDER !== "undefined" ? TOOL_ORDER : []).forEach(function (k) {
+      if (!counts[k] || !TOOLS[k]) return;
+      var d = TOOLS[k];
+      html += '<button class="pill pill-tool' + (state.tool === k ? " active" : "") +
+        '" data-tool="' + k + '" title="' + d.note + '">' + d.emoji + " " + d.name +
+        "<span>" + counts[k] + "</span></button>";
+    });
+    wrap.innerHTML = html;
+  }
+
+  function setFilterSub(open) {
+    var sub = document.getElementById("filterSub");
+    if (sub) sub.hidden = !open;
+    var btn = document.getElementById("filterToggle");
+    if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    updateFilterToggleLabel();
+  }
+
+  function updateFilterToggleLabel() {
+    var btn = document.getElementById("filterToggle");
+    if (!btn) return;
+    var sub = document.getElementById("filterSub");
+    var open = sub ? !sub.hidden : true;
+    var n = 0;
+    ["season", "town", "time", "tool"].forEach(function (k) { if (state[k] !== "all") n++; });
+    btn.textContent = open ? "收起筛选 ▲" : (n ? "更多筛选 ▼ · 已选 " + n + " 项" : "更多筛选 ▼");
+  }
+
+  // 30 分钟内能上桌的，卡片上给个闪电标
+  function fastChip(r) {
+    var v = timeVal(r.time);
+    if (!v || v > 30) return "";
+    return '<span class="chip chip-fast" title="30 分钟内能上桌">⚡ ' + r.time + "</span>";
   }
 
   function renderSeasonPills() {
@@ -409,6 +503,26 @@
     });
     if (townOf(r.name)) chipsHtml += '<span class="tag tag-town">' + townOf(r.name) + "</span>";
     document.getElementById("modalTags").innerHTML = chipsHtml;
+
+    // 厨具提示：要什么家什，或者干脆不用开火
+    var toolsEl = document.getElementById("modalTools");
+    if (toolsEl) {
+      var parts = [];
+      if (CX.tools) {
+        var tIds = CX.tools.of(r);
+        if (CX.tools.nofire(r)) {
+          parts.push('<span class="mt-chip mt-nofire">🥗 不用开火</span>');
+        } else if (!tIds.length) {
+          parts.push('<span class="mt-chip">🍳 只用一口锅</span>');
+        }
+        tIds.forEach(function (k) {
+          var d = (typeof TOOLS !== "undefined") ? TOOLS[k] : null;
+          if (d) parts.push('<span class="mt-chip mt-need">' + d.emoji + " " + d.name + "</span>");
+        });
+      }
+      toolsEl.innerHTML = parts.join("");
+      toolsEl.hidden = !parts.length;
+    }
     document.getElementById("modalIng").innerHTML = "";
     renderCurIngredients();
     renderCurNutrition();
@@ -914,6 +1028,58 @@
       });
     }
 
+    var timeWrap = document.getElementById("timePills");
+    if (timeWrap) {
+      timeWrap.addEventListener("click", function (e) {
+        var btn = e.target.closest(".pill");
+        if (!btn) return;
+        state.time = btn.dataset.time;
+        renderPills();
+        renderGrid();
+      });
+    }
+
+    var toolWrap = document.getElementById("toolPills");
+    if (toolWrap) {
+      toolWrap.addEventListener("click", function (e) {
+        var btn = e.target.closest(".pill");
+        if (!btn) return;
+        state.tool = btn.dataset.tool;
+        renderPills();
+        renderGrid();
+      });
+    }
+
+    // 折叠「更多筛选」，窄屏默认收起，免得筛选条占掉半个屏幕
+    var filterToggle = document.getElementById("filterToggle");
+    if (filterToggle) {
+      setFilterSub(window.innerWidth > 720);
+      filterToggle.addEventListener("click", function () {
+        var sub = document.getElementById("filterSub");
+        setFilterSub(sub ? sub.hidden : true);
+      });
+    }
+
+    // 下班快手菜：30 分钟内、只用一口锅，按用时从短到长排
+    var quickBtn = document.getElementById("quickBtn");
+    if (quickBtn) {
+      quickBtn.addEventListener("click", function () {
+        var on = state.time === "t30" && state.tool === "base";
+        if (on) {
+          state.time = "all";
+          state.tool = "all";
+        } else {
+          state.time = "t30";
+          state.tool = "base";
+          state.sort = "time";
+          sort.value = "time";
+          setFilterSub(true);
+        }
+        renderPills();
+        renderGrid();
+      });
+    }
+
     var search = document.getElementById("searchInput");
     search.addEventListener("input", function () {
       state.kw = search.value;
@@ -960,7 +1126,7 @@
     document.getElementById("randomHero").addEventListener("click", randomPick);
     document.getElementById("resetBtn").addEventListener("click", function () {
       state.kw = ""; state.cat = "all"; state.sort = "default"; state.remote = false; state.fav = false;
-      state.season = "all"; state.town = "all";
+      state.season = "all"; state.town = "all"; state.time = "all"; state.tool = "all";
       search.value = ""; sort.value = "default";
       renderPills();
       renderGrid();

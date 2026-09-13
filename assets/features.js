@@ -534,6 +534,70 @@
   }
   function weekCount() { return weekIds().length; }
 
+  /* ---------- 2e. 用时与厨具 ---------- */
+  // 「40分钟」「1.5小时」「2天」「半个月」→ 分钟数，认不出来返回 0
+  function parseTime(s) {
+    s = String(s || "");
+    if (!s) return 0;
+    if (s.indexOf("半个月") >= 0 || s.indexOf("半月") >= 0) return 7200;
+    if (s.indexOf("半天") >= 0) return 240;
+    var h = s.match(/(\d+(?:\.\d+)?)\s*(?:小时|钟头)/);
+    if (h) return Math.round(parseFloat(h[1]) * 60);
+    var m = s.match(/(\d+)\s*分钟/);
+    if (m) return parseInt(m[1], 10);
+    var d = s.match(/(\d+)\s*天/);
+    if (d) return parseInt(d[1], 10) * 480;
+    if (s.indexOf("数日") >= 0) return 1920;
+    var mo = s.match(/(\d+)\s*个月/);
+    if (mo) return parseInt(mo[1], 10) * 14400;
+    if (s.indexOf("数月") >= 0) return 43200;
+    return 0;
+  }
+
+  function timeLevelOf(minutes) {
+    if (!minutes) return "";
+    if (minutes <= 20) return "t20";
+    if (minutes <= 30) return "t30";
+    if (minutes <= 45) return "t45";
+    if (minutes <= 60) return "t60";
+    return "slow";
+  }
+
+  // 厨具：从步骤、小贴士与菜名里认，返回工具 id 数组（不含 base）
+  function toolsOf(r) {
+    if (r.__tools) return r.__tools;
+    var text = (r.steps || []).join(" ") + " " + (r.tips || "") + " " + r.name;
+    var out = [];
+    if (typeof TOOL_RULES !== "undefined") {
+      for (var i = 0; i < TOOL_RULES.length; i++) {
+        var t = TOOL_RULES[i].t;
+        if (text.indexOf(TOOL_RULES[i].k) >= 0 && out.indexOf(t) < 0) out.push(t);
+      }
+    }
+    r.__tools = out;
+    return out;
+  }
+
+  // 不用开火：做法里完全没有加热动作
+  function noFire(r) {
+    if (typeof r.__nofire === "boolean") return r.__nofire;
+    var text = (r.steps || []).join(" ");
+    var heat = false;
+    var words = (typeof HEAT_WORDS !== "undefined" ? HEAT_WORDS : []);
+    for (var i = 0; i < words.length && !heat; i++) {
+      if (text.indexOf(words[i]) >= 0) heat = true;
+    }
+    r.__nofire = !heat;
+    return r.__nofire;
+  }
+
+  // 厨具档位：不用开火优先，其次列出需要的专门厨具，都不需要就是 base
+  function toolLevelOf(r) {
+    if (noFire(r)) return "nofire";
+    var t = toolsOf(r);
+    return t.length ? t[0] : "base";
+  }
+
   /* ---------- 5. 营养 / 卡路里估算 ---------- */
   function toGrams(amount, unit) {
     var u = (unit || "").toLowerCase();
@@ -764,6 +828,15 @@
       clear: weekClear, ids: weekIds, count: weekCount
     },
     dialect: { forms: dialectForms },
+    time: {
+      parse: parseTime, level: timeLevelOf,
+      levels: (typeof TIME_LEVELS !== "undefined" ? TIME_LEVELS : [])
+    },
+    tools: {
+      of: toolsOf, nofire: noFire, level: toolLevelOf,
+      dict: (typeof TOOLS !== "undefined" ? TOOLS : {}),
+      order: (typeof TOOL_ORDER !== "undefined" ? TOOL_ORDER : [])
+    },
     scale: { one: scaleIngredient, list: scaleIngredients, parse: parseQty },
     nutrition: { calc: calcNutrition },
     seo: { recipe: injectRecipeJsonLd, itemList: injectItemListJsonLd },
